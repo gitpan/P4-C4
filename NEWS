@@ -1,0 +1,44 @@
+P4::C4 NEWS --  history of user-visible changes.
+Copyright (C) 2002 Wilson Snyder.
+See the end for copying conditions.
+
+The contributors that suggested a given feature is shown in [].
+	
+This uses outline mode in Emacs.  See C-h m [M-x describe-mode].
+
+* Changes in P4::C4 2.000 8/08/2002
+
+**	First CPAN Release
+
+**	Changes relative to C4-1.6 C program by Neil Russell
+
+***	The .c4 file is now named .p4config
+	as the p4 program knows how to use a .p4config file.
+
+***	The .c4ignore file is now named .cvsignore
+	to allow direct importing/exporting to/from CVS.
+
+***	Multiple and single-file arguments allowed with the update command.
+
+***	Client-create command added.
+
+***	The API is used, rather then calling p4
+	This improves the speed of the program.
+
+***	A cache of file modification times is kept
+	This cuts down on the number of diffs, greatly speeding things up.
+
+
+----------------------------------------------------------------------
+$Id: NEWS,v 1.3 2002/08/08 13:35:38 wsnyder Exp $
+----------------------------------------------------------------------
+Copyright information:
+
+Copyright (C) 2002 Wilson Snyder
+
+   See the README file included with this file for licencing information.
+
+Local variables:
+mode: outline
+paragraph-separate: "[ 	]*$"
+end:

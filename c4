@@ -1,0 +1,399 @@
+#!/usr/local/bin/perl -w
+#$Id: c4,v 1.14 2002/07/25 19:06:05 wsnyder Exp $
+######################################################################
+#
+# This program is Copyright 2002 by Wilson Snyder.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of either the GNU General Public License or the
+# Perl Artistic License.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the Perl Artistic License
+# along with this module; see the file COPYING.  If not, see
+# www.cpan.org
+#                                                                           
+######################################################################
+
+require 5.6.0;
+use lib "blib/lib";
+use lib "blib/arch";
+#use lib "/home/wsnyder/SandBox/Tools/wsnyder/perltools/P4-C4/blib/lib";
+#use lib "/home/wsnyder/SandBox/Tools/wsnyder/perltools/P4-C4/blib/arch";
+
+use Getopt::Long;
+use IO::File;
+use Pod::Usage;
+use Cwd qw(getcwd chdir);
+use File::Find;
+use Carp;
+use strict;
+
+use P4::C4;
+use P4::C4::Path qw(fileNoLinks);
+
+use vars qw ($Debug);
+
+#======================================================================
+
+$ENV{P4CONFIG} ||= '.p4config';
+
+#======================================================================
+# main
+
+autoflush STDOUT 1;
+autoflush STDERR 1;
+
+$Debug = 0;
+our $Opt_Cmd;
+our @Opt_CmdParams = ();
+
+our $P4Opt = new P4::Getopt;
+@ARGV = $P4Opt->parameter(@ARGV);
+Getopt::Long::config ("pass_through", "no_auto_abbrev");
+if (! GetOptions (
+		  "help"	=> \&usage,
+		  "debug"	=> \&debug,
+		  "<>"		=> \&parameter,
+		  )) {
+    usage();
+}
+
+if (!defined $Opt_Cmd) {
+    usage();
+}
+
+# Run relative to absolute cwd, so the client spec doesn't have links.
+# This is because perforce checks we match the client spec, but doesn't consider
+# symlinks to the same place to be good enough.
+chdir(fileNoLinks(getcwd()));
+
+# Set user, allowing a default
+if ($ENV{C4USER_DEFAULT} && !$ENV{P4USER}) {
+    my $p4 = new P4::Client;
+    $P4Opt->setClientOpt($p4);
+    $p4->SetUser($ENV{C4USER_DEFAULT});
+    $p4->Init() or die "$0: %Error: Failed to connect to Perforce Server\n";
+    if (!$p4->isUser($ENV{P4USER}||$ENV{USER})) {
+	$ENV{P4USER} = $ENV{C4USER_DEFAULT};
+    }
+}
+
+# Convert common CVS command names to what perforce wants
+$Opt_Cmd = "submit" if $Opt_Cmd eq "ci";
+$Opt_Cmd = "submit" if $Opt_Cmd eq "commit";
+$Opt_Cmd = "delete" if $Opt_Cmd eq "rm";
+
+# Parse the command, and see if there are any file specs
+# Replace the file specs with absolute filenames, if possible.
+# Furthermore, chdir to the first one in an attempt to find the
+# right client file path.
+print "Cmd: ",join(' ',$Opt_Cmd),"\n" if $Debug;
+print "  Pos: ",join(' ',@Opt_CmdParams),"\n" if $Debug;
+my @cmdParsed = $P4Opt->parseCmd($Opt_Cmd, @Opt_CmdParams);
+my @cmdOut;
+my $didCwd;
+my $pwd = getcwd();
+for (my $i=0; $i<=$#cmdParsed; $i++) {
+    my $arg   = $Opt_CmdParams[$i];
+    my $parse = $cmdParsed[$i];
+    print "  Arg $arg -> $parse\n" if $Debug;
+    if ($parse =~ /^file/
+	&& $arg !~ m%//%) {   # Not a perforce depot filename
+	$arg .= "/..." if -d $arg;
+	my $abs = fileNoLinks($arg);
+	push @cmdOut, $abs;
+	print "   abs-> $abs\n" if $Debug;
+	# Can we cwd there?
+	if (!$didCwd && $abs) {
+	    for (my $fn=$abs; $fn;) {
+		if (-d $fn) {
+		    $didCwd = $fn;
+		    print "   SetCWD $fn\n" if $Debug;
+		    last;
+		}
+		last if ($fn !~ s%(.*)/.*$%$1%);
+	    }
+	}
+    } else {
+	push @cmdOut, $arg;
+    }
+}
+chdir($didCwd) if $didCwd;   # Do last, else second file in list will be messed up
+@Opt_CmdParams = @cmdOut;
+
+# Execute comand
+if ($Opt_Cmd =~ /^client-create$/) {
+    cmd_client_create();
+} elsif ($Opt_Cmd eq "get") {
+    die "%Error: Use 'c4 update' instead of 'c4 get'.\n";
+} elsif ($Opt_Cmd eq "update") {
+    cmd_update();
+} elsif ($Opt_Cmd eq "submit") {
+    cmd_submit();
+} elsif ($Opt_Cmd eq "sync") {
+    die "%Error: Use 'c4 update' instead of 'c4 sync'.\n";
+} elsif ($Opt_Cmd eq "help") {
+    if ($#Opt_CmdParams < 0) {
+	print "C4 Wrapper commands:\n";
+	print "\tc4      client-create -t <template> <client>\n";
+	print "\tc4 [-n] update [files...]\n";
+	print "\nP4 Help:\n";
+    }
+    cmd_p4();
+} else {
+    cmd_p4();
+}
+
+#----------------------------------------------------------------------
+
+sub usage {
+    print '$Id: c4,v 1.14 2002/07/25 19:06:05 wsnyder Exp $ ', "\n";
+    pod2usage(-verbose=>2, -exitval => 2);
+    exit (1);
+}
+
+sub debug {
+    $P4::C4::Debug = 1;
+    $Debug = 1;
+}
+
+sub parameter {
+    my $param = shift;
+    if ($param =~ /^-/) {
+	if (!defined $Opt_Cmd) {
+	    die "$0: %Error: Invalid global option: $param\n";
+	} else {
+	    push @Opt_CmdParams, $param;
+	}
+    } else {
+	if (!defined $Opt_Cmd) {
+	    $Opt_Cmd = $param;
+	} else {
+	    push @Opt_CmdParams, $param;
+	}
+    }
+}
+ 
+#######################################################################
+#######################################################################
+#######################################################################
+# Commands invoked by the user
+
+sub cmd_p4 {
+    # Call c4 using all the default parameters from the command line
+    my $cmd = "p4 ";
+    $cmd .= join(' ', $P4Opt->get_parameters);
+    $cmd .= ' '.$Opt_Cmd;
+    $cmd .= " -n" if ($P4Opt->noop);	# convert 'c4 -n update' to 'c4 update -n'
+    $cmd .= ' '.join(' ', @Opt_CmdParams);
+
+    # Run
+    print "\t$cmd\n" if $Debug;
+    local $! = undef;
+    system $cmd;
+    my $status = $?; my $msgx = $!;
+    if (!$Debug) {
+	($status == 0) or exit($status);  # Don't print a message, p4 did
+    }
+    ($status == 0) or croak "%Error: Command Failed $status $msgx, stopped";
+}
+
+sub cmd_client_create {
+    print "cmd_client_create ",join(' ',@Opt_CmdParams),"\n"  if $Debug;
+
+    my $p4 = new P4::C4;
+    $P4Opt->setClientOpt($p4);
+    $p4->Init() or die "$0: %Error: Failed to connect to Perforce Server\n";
+    $p4->createClient('-c4', '-rmdir', @Opt_CmdParams);
+}
+
+sub cmd_update {
+    print "cmd_update ",join(' ',@Opt_CmdParams),"\n"  if $Debug;
+
+    my $p4 = new P4::C4(opt=>$P4Opt);
+    $p4->Init() or die "$0: %Error: Failed to connect to Perforce Server\n";
+    $p4->update(@Opt_CmdParams);
+}
+
+sub cmd_submit {
+    print "cmd_submit ",join(' ',@Opt_CmdParams),"\n"  if $Debug;
+
+    my $p4 = new P4::C4(opt=>$P4Opt);
+    $p4->Init() or die "$0: %Error: Failed to connect to Perforce Server\n";
+    $p4->submitCheckC4(@Opt_CmdParams);
+    cmd_p4();
+}
+
+#######################################################################
+__END__
+
+=pod
+
+=head1 NAME
+
+c4 - CVSish wrapper for perforce p4 program
+
+=head1 SYNOPSIS
+
+    c4        help
+    c4        client-create -t <template> <client>
+    c4 [-n]   update
+
+    c4 I<any p4 command>
+       i.e.:  c4 add <file>
+              c4 delete <file>
+              c4 diff <file>    		     
+
+=head1 DESCRIPTION
+
+C4 makes C<p4> seem more like C<cvs> by having all files writable by
+default.
+
+C4 adds several commands (update/client_create), see the COMMANDS section.
+
+C4 allows a default user, see the ENVIRONMENT section.
+
+When passed a filename on any c4 command, c4 makes the filename absolute,
+with all symlinks reduced, and chdir's if possible to the first such
+filename.  If the argument is a directory, a /... is appended.  This makes
+it a lot more likely that perforce commands will work when issued from
+outside a client area.  (For example: c4 add /my/area/boo/blaz.)
+
+=head1 COMMANDS
+
+Any command not listed here is passed directly to perforce.
+
+=over 4
+
+=item ci
+
+Alias for C<c4 submit>.
+
+=item commit
+
+Alias for C<c4 submit>.
+
+=item client-create [-t template] <client>
+
+Create a client specification, making sure it gets named, and setting the
+clobber, allwrite, and rmdir attributes as required for c4 update.  Also,
+create a .p4config file with the name of the client in it.
+
+=item rm [-c changelist] file...
+
+Alias for C<c4 delete>.
+
+=item update [-n] [file...]
+
+Update is similar to cvs update.  With -n, only the actions to be taken are
+shown, it does not actually change anything.  On a update without a -n, c4
+performs the following steps:
+
+=over 4
+
+C<p4 edit> any files that have been changed from the version checked out
+from the depot.
+
+C<p4 revert> any files that were C<p4 edit>ed, but now match the version
+in the depot.
+
+C<p4 sync> to get recent changes.
+
+Look for any unknown files.
+
+=back
+
+It also prints a summary of each file that is modified in the client area.
+Lowercase letters are used for actions that were not caused by the user,
+and are different from cvs letters.  Here are the letters, the state
+causing that message, and what may happen on a update.
+
+    A    (A)dded in client, not yet in depot, stays Add.
+    M    (M)odified in client, different from depot, stays Modified.
+    R    (R)emoved in client, still in depot, stays Removed.
+    U    (U)pdate required, unmodified in client, new version from depot.
+    a    Never in client, (a)dded in depot, will appear.
+    d    Same in client, (d)eleted in depot, will disappear.
+    l    (L)ost in client, exists in depot, will appear.
+    m    (m)odified in client, but now matches depot, will be reverted.
+    ?    Unknown - Not in depot, not added, not in .cvsignore, no action.
+
+Unknown files (?) should be ignored with a .cvsignore file as described in
+the FILES section.
+
+=back
+
+=head1 ARGUMENTS
+
+=over 4
+
+=item --help
+
+Displays this message and program version and exits.
+
+=back
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item C4USER_DEFAULT
+
+If specified, when a command is issued and the USER does not have a P4
+license, then rather then create a new P4 user, the user in C4USER_DEFAULT
+will be used.  This allows infrequent read-only users to share the same
+license.
+
+=back
+
+=head1 FILES
+
+=over 4
+
+=item .cvsignore
+
+Specifies files that are in the same directory as the .cvsignore that should
+be ignored; there will be no ?'s printed when a 'c4 update' is executed.
+
+Ignore files are mostly compatible with CVS.  The list of ignores is
+initialized with:
+
+    tags    TAGS    .make.state     .nse_depinfo
+    *~      #*      .#*     ,*      _$*     *$
+    *.old   *.bak   *.BAK   *.orig  *.rej   .del-*
+    *.a     *.olb   *.o     *.obj   *.so    *.exe
+    *.Z     *.elc   *.ln
+    core
+
+The patterns found in `.cvsignore' are only valid for the directory that
+contains them, not for any sub-directories.  A single exclamation mark
+(`!')  clears the ignore list.
+
+The wildcards * and ? are honored, no other wildcards are currently
+supported.
+
+As with CVS, comments are NOT supported!
+
+=back
+
+=head1 SEE ALSO
+
+C<c4>
+C<P4::C4>
+C<p4>
+
+=head1 AUTHORS
+
+Wilson Snyder <wsnyder@wsnyder.org>
+
+=cut
+
+######################################################################
+### Local Variables:
+### compile-command: "./c4 "
+### End:

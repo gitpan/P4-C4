@@ -1,0 +1,68 @@
+   This is the P4::C4 Perl Package.
+
+Copyright
+=========
+
+   This package is Copyright 2002 by Wilson Snyder
+<wsnyder@wsnyder.org>.
+
+   You may distribute under the terms of either the GNU General Public
+License or the Artistic License, as specified in the Perl README file.
+
+   This code is provided with no warranty of any kind, and is used
+entirely at your own risk.
+
+Description
+===========
+
+   This package wrapps the Perforce client in a CVS like wrapper.
+
+Obtaining Distribution
+======================
+
+   The latest version is available at `http://www.perl.org/CPAN/'
+
+   Download the latest package from that site, and decompress.  `gunzip
+P4-C4_version.tar.gz ; tar xvf P4-C4_version.tar'
+
+Supported Systems
+=================
+
+   This version of P4::C4 has been built and tested on:
+
+   * i386-linux
+
+   It should run on any Unix system with Perforce, provided that the
+required perl modules below are ported to the platform.  Minor porting
+may be required for Windows systems.
+
+Installation
+============
+
+  1.  Before installing this module, you need the Perforce Perl library,
+     P4::Client, available from CPAN or www.perforce.com.  This in turn
+     requires the Perforce API, also available from www.perforce.com.
+
+  2. `cd' to the directory containing this README notice.
+
+  3. Type `perl Makefile.PL' to configure P4::C4 for your system.
+
+  4. Type `make' to compile P4::C4.
+
+  5. Type `make test' to check the compilation.  You will need a P4
+     deamon running.  It will NOT change the repository.
+
+  6. Type `make install' to install the programs and any data files and
+     documentation.
+
+  7. Type `c4 help' to see the command line interface.
+
+
+Differences from C4-1.6
+=======================
+
+   This C4 package is based upon c4-1.6 written in C by Neil Russell in
+1999.  It has the same basic operations, with several minor differences.
+For these differences, see the bottom of the NEWS file in the same
+directory as this readme.
+
