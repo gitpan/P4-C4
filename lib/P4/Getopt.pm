@@ -1,4 +1,4 @@
-# $Revision: 1.26 $$Date: 2004/08/27 16:57:04 $$Author: ws150726 $
+# $Revision: 1.3 $$Date: 2004/09/13 13:09:55 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -25,7 +25,7 @@ use Cwd;
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.030';
+$VERSION = '2.031';
 
 #p4 -s -c <client> -d <pwd> -H <host> -p <port> -P <password> -u <user> -C <charset> 
 
@@ -106,8 +106,9 @@ $VERSION = '2.030';
   # C4's own
   'client-create' =>'[-i] [-o] [-d] [-f] [-rmdir] [-c4] [-t template] [client]',
   'client-delete' =>'[-d] [-f] [client]',
-  'update'	=>'[-n] [-f] [files...]',
-  'unknown'	=>'[files...]',
+  'update'	  =>'[-n] [-f] [files...]',
+  'unknown'	  =>'[files...]',
+  'help-summary'  =>'',
 );
 
 #######################################################################
@@ -224,6 +225,16 @@ sub parameter {
 
 #######################################################################
 # Accessors
+
+sub commands_sorted {
+    return (sort (keys %Args));
+}
+
+sub command_arg_text {
+    my $self = shift;
+    my $cmd = shift;
+    return ($Args{$cmd});
+}
 
 sub _param_changed {
     my $self = shift;
@@ -438,21 +449,29 @@ There is a accessor for each parameter listed above.  In addition:
 
 =over 4
 
+=item $self->commands_sorted()
+
+Return sorted list of all commands.
+
+=item $self->command_arg_text(<cmd>)
+
+Return textual description of the specified command.
+
 =item $self->fileline()
 
 The filename and line number last parsed.
-
-=item $self->parseCmd(<cmd>, <opts>)
-
-Return a array with one element for each option.  The element is either
-'switch', the name of the switch the option is specifying, or the name of
-the parameter.
 
 =item $self->hashCmd(<cmd>, <opts>)
 
 Return a hash with one key for each option.  The value of the key is 1 if a
 no-argument option was set, else it is an array with each value the option
 was set to.
+
+=item $self->parseCmd(<cmd>, <opts>)
+
+Return a array with one element for each option.  The element is either
+'switch', the name of the switch the option is specifying, or the name of
+the parameter.
 
 =item $self->setClientOpt(<P4::Client>)
 

@@ -1,4 +1,4 @@
-# $Revision: 1.13 $$Date: 2004/08/26 15:04:20 $$Author: ws150726 $
+# $Revision: 1.2 $$Date: 2004/09/13 13:09:55 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -13,7 +13,7 @@
 # 
 ######################################################################
 
-package P4::C4::Info;
+package P4::C4::Sync;
 require 5.006_001;
 
 use strict;
@@ -23,14 +23,14 @@ use Carp;
 ######################################################################
 #### Configuration Section
 
-our $VERSION = '2.030';
+$VERSION = '2.031';
 
 #######################################################################
 #######################################################################
 #######################################################################
-# Info Interface
+# Sync Interface
 
-package P4::C4::Info::UI;
+package P4::C4::Sync::UI;
 use P4::C4::UI;
 use strict;
 our @ISA = qw( P4::C4::UI );
@@ -39,15 +39,15 @@ sub OutputInfo {
     my $self = shift;
     my $level = shift;
     my $data = shift;
-    if ($level==0) {
-	print __PACKAGE__.": $level: $data\n" if $P4::C4::Debug;
-	if ($data =~ /^Client root:\s+(.*)$/i) {
-	    $self->{c4self}{clientRoot} = $1;
-	} elsif ($data =~ /^Server version:\s+(.*)$/i) {
-	    $self->{c4self}{serverVersion} = $1;
-	}
+    if ($data =~ /- updating (\S+)/) {
+	$self->{c4self}{_files}{$1}{filename} = $1;
+	my $fref = $self->{c4self}{_files}{$1};
+	$fref->{updated} = 1;
+	$fref->{status} = 'C-sync' if ($fref->{status});
+	$fref->{status} ||= 'U-sync';
+    } elsif ($data =~ /(\S+) - must resolve/) {
     } else {
-	die "$0: %Error: Bad p4 response: $data\n";
+	print __PACKAGE__.": $level: $data\n" if $P4::C4::Debug;
     }
 }
 
@@ -57,29 +57,17 @@ sub OutputInfo {
 # OVERRIDE METHODS
 
 package P4::C4;
-sub _infoFetch {
+use File::Spec::Functions;
+sub syncFiles {   # Regular routine called sync
     my $self = shift;
-    print "_infoFetch\n" if $P4::C4::Debug;
-    my $ui = new P4::C4::Info::UI(c4self=>$self);
-    $self->Run($ui,'info');
-}
-
-sub clientRoot {
-    my $self = shift;
-    if (!$self->{clientRoot}) {
-	$self->_infoFetch();
-	print "clientRoot = ",$self->{clientRoot}||"","\n" if $P4::C4::Debug;
+    my @params = @_;
+    # Sync specified areas
+    for (my $i=0; $i<=$#params; $i++) {
+	$params[$i] = catfile($params[$i],"...") if -d $params[$i];
     }
-    return $self->{clientRoot};  # Cached in $self
-}
-
-sub serverVersion {
-    my $self = shift;
-    if (!$self->{serverVersion}) {
-	$self->_infoFetch();
-	print "serverVersion = ",$self->{serverVersion}||"","\n" if $P4::C4::Debug;
-    }
-    return $self->{serverVersion};  # Cached in $self
+    print "sync @params\n" if $P4::C4::Debug;
+    my $ui = new P4::C4::Sync::UI(c4self=>$self);
+    $self->Run($ui, 'sync', @params);
 }
 
 ######################################################################
@@ -91,36 +79,11 @@ __END__
 
 =head1 NAME
 
-P4::C4::Info - Perforce Info parsing
-
-=head1 SYNOPSIS
-
-  use P4::C4::Info;
-
-  my $p4 = new P4::C4;
-  return $p4->clientRoot();
-  return $p4->serverVersion();
-  ...
+P4::C4::Sync - Perforce Sync parsing
 
 =head1 DESCRIPTION
 
-This module provides utilities to operate on Perforce global information.
-
-=head1 ACCESSORS
-
-=over 4
-
-=item $self->clientRoot()
-
-Returns the root directory of the client.  Note this is cached as long
-as the parent object exists.
-
-=item $self->serverVersion()
-
-Returns the server version of the client.  Note this is cached as long
-as the parent object exists.
-
-=back
+This module is for internal P4::C4 use.
 
 =head1 DISTRIBUTION
 

@@ -1,4 +1,4 @@
-# $Revision: 1.21 $$Date: 2004/08/26 15:04:20 $$Author: ws150726 $
+# $Revision: 1.2 $$Date: 2004/09/13 13:09:55 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -27,7 +27,7 @@ use P4::C4::Info;
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.030';
+$VERSION = '2.031';
 
 #######################################################################
 #######################################################################
@@ -156,6 +156,7 @@ sub OutputInfo {
 
 package P4::C4;
 use File::Path;
+use File::Spec::Functions;
 use Cwd;
 
 sub createClient {
@@ -257,8 +258,8 @@ sub clientDelete {
     }
 
     # Delete created files
-    unlink("$root/.c4cache");
-    unlink("$root/.p4config");
+    unlink(catfile($root,".c4cache"));
+    unlink(catfile($root,".p4config"));
     rmdir $root if $madedir;
 
     chdir $orig_pwd;

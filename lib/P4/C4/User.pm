@@ -1,4 +1,4 @@
-# $Revision: 1.13 $$Date: 2004/08/26 15:04:20 $$Author: ws150726 $
+# $Revision: 1.2 $$Date: 2004/09/13 13:09:55 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -13,7 +13,7 @@
 # 
 ######################################################################
 
-package P4::C4::Diff;
+package P4::C4::User;
 require 5.006_001;
 
 use strict;
@@ -23,14 +23,14 @@ use Carp;
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.030';
+$VERSION = '2.031';
 
 #######################################################################
 #######################################################################
 #######################################################################
-# Diff Interface
+# User Interface
 
-package P4::C4::Diff::UI;
+package P4::C4::User::IsUI;
 use P4::C4::UI;
 use strict;
 our @ISA = qw( P4::C4::UI );
@@ -39,17 +39,14 @@ sub OutputInfo {
     my $self = shift;
     my $level = shift;
     my $data = shift;
-    return if ($data =~ /^==== /);
-}
-
-sub Diff {
-    my $self = shift;
-    my $f1 = shift;
-    my $f2 = shift;
-    my $flags = shift;
-    my $diff = shift;
-    $self->{differs} = $diff;
-    print __PACKAGE__.": DIFFERS $diff\n" if $P4::C4::Debug;
+    if ($level==0) {
+	print __PACKAGE__.": $level: $data\n" if $P4::C4::Debug;
+	if ($data =~ /^$self->{user}\s/) {
+	    $self->{status} = $data;
+	}
+    } else {
+	die "$0: %Error: Bad p4 response: $data\n";
+    }
 }
 
 #######################################################################
@@ -57,18 +54,15 @@ sub Diff {
 #######################################################################
 # OVERRIDE METHODS
 
-package P4::C4;
-sub differentFiles {   # Regular routine called diff
+package P4::Client;
+sub isUser {
     my $self = shift;
-    my @params = @_;
-
+    my $user = shift;
     # Return true if user exists
-    print "diff @params\n" if $P4::C4::Debug;
-    my $ui = new P4::C4::Diff::UI(c4self=>$self);
-    $self->DoPerlDiffs();
-    $self->Run($ui,'diff', @params);
-    print "  Does differ @params\n" if $P4::C4::Debug && $ui->{differs};
-    return $ui->{differs};
+    print "isUser $user" if $P4::C4::Debug;
+    my $ui = new P4::C4::User::IsUI (user=>$user);
+    $self->Users($ui);
+    return $ui->{status}
 }
 
 ######################################################################
@@ -80,28 +74,29 @@ __END__
 
 =head1 NAME
 
-P4::C4::Diff - Perforce Diff parsing
+P4::C4::User - User utilities
 
 =head1 SYNOPSIS
 
-  use P4::C4::Diff;
+  use P4::C4::User;
 
-  my $p4 = new P4::C4;
-  $p4->differentFiles (<params>)
+  my $p4 = new P4::Client;
+  $p4->isUser("foo");
   ...
 
 =head1 DESCRIPTION
 
-This module provides utilities to retrieve Perforce difference information.
+This module provides utilities to operate on Perforce users.
 
-=head1 METHODS
+=head1 ACCESSORS
+
+There is a accessor for each parameter listed above.  In addition:
 
 =over 4
 
-=item $self->differentFiles ( args )
+=item $self->isUser ( \$username )
 
-Run a P4 diff operation with the given arguments, and return true if the
-files differ in any way.
+Returns true if the user exists.
 
 =back
 
@@ -119,6 +114,6 @@ Wilson Snyder <wsnyder@wsnyder.org>
 
 =head1 SEE ALSO
 
-L<P4::Client>, L<P4::C4>
+L<P4::Client>, L<P4::C4>, 
 
 =cut

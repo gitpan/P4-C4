@@ -1,4 +1,4 @@
-# $Revision: 1.14 $$Date: 2004/08/26 15:04:20 $$Author: ws150726 $
+# $Revision: 1.2 $$Date: 2004/09/13 13:09:55 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -17,7 +17,7 @@ package P4::C4::File;
 use DirHandle;
 use strict;
 
-our $VERSION = '2.030';
+our $VERSION = '2.031';
 
 sub new {
     my $class = shift;
@@ -33,6 +33,7 @@ sub new {
 
 package P4::C4;
 use Fcntl ':mode';	# S_ stat functions
+use File::Spec::Functions;
 use strict;
 
 sub findFiles {
@@ -57,7 +58,7 @@ sub _findFilesRecurse {
 	my @files;
 	while (defined (my $basefile = $dh->read)) {
 	    if (($basefile ne ".") && ($basefile ne "..")) {
-		my $file = "$dir/$basefile";
+		my $file = catfile($dir,$basefile);
 		push @files, $file;
 	    }
 	}

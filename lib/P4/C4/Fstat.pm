@@ -1,4 +1,4 @@
-# $Revision: 1.14 $$Date: 2004/08/26 15:04:20 $$Author: ws150726 $
+# $Revision: 1.2 $$Date: 2004/09/13 13:09:55 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -23,7 +23,7 @@ use Carp;
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.030';
+$VERSION = '2.031';
 
 #######################################################################
 #######################################################################
@@ -65,11 +65,12 @@ sub OutputStat {
 # OVERRIDE METHODS
 
 package P4::C4;
+use File::Spec::Functions;
 sub fstatFiles {   # Regular routine called fstat
     my $self = shift;
     my $filename = shift;
     # Return true if user exists
-    $filename .= "/..." if -d $filename;
+    $filename = catfile($filename,"...") if -d $filename;
     print "fstat $filename\n" if $P4::C4::Debug;
     my $ui = new P4::C4::Fstat::UI(c4self=>$self);
     $self->Fstat($ui, "$filename");

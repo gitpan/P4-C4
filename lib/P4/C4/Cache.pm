@@ -1,4 +1,4 @@
-# $Revision: 1.11 $$Date: 2004/08/26 15:04:20 $$Author: ws150726 $
+# $Revision: 1.2 $$Date: 2004/09/13 13:09:55 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -15,7 +15,7 @@
 
 package P4::C4::Cache;
 
-$VERSION = '2.030';
+$VERSION = '2.031';
 
 ######################################################################
 ######################################################################
@@ -25,13 +25,14 @@ $VERSION = '2.030';
 package P4::C4;
 use P4::C4::Info;
 use Data::Dumper;
+use File::Spec::Functions;
 use strict;
 
 our $CurrentSelf;
 
 sub cacheFilename {
     my $self = shift;
-    return $self->clientRoot."/.c4cache";
+    return catfile($self->clientRoot,".c4cache");
 }
 
 sub rmCache {

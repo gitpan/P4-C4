@@ -1,4 +1,4 @@
-# $Revision: 1.14 $$Date: 2004/08/26 15:04:20 $$Author: ws150726 $
+# $Revision: 1.2 $$Date: 2004/09/13 13:09:55 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -19,13 +19,15 @@ require 5.006_001;
 use strict;
 use vars qw($VERSION $Debug);
 use Carp;
+use File::Spec;
+use File::Spec::Functions;
 use IO::File;
 use Cwd qw(getcwd);
 
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.030';
+$VERSION = '2.031';
 
 #######################################################################
 #######################################################################
@@ -59,11 +61,12 @@ sub isIgnored {
     my $self = shift;
     my $filename = shift;
 
-    $filename = getcwd()."/".$filename if $filename !~ m%^/%;
+    $filename = File::Spec->rel2abs($filename);
     return 1 if _checkOneDir($self,'GLOBAL',$filename);
-    while ($filename =~ m%(.*)/([^\/]*)$%) {
-	return 1 if _checkOneDir($self,$1,$filename);
-	$filename = $1;
+    my @dirlist = File::Spec->splitdir($filename);
+    while ($#dirlist > 0) {
+	return 1 if _checkOneDir($self,catdir(@dirlist),$filename);
+	$filename = pop @dirlist;
     }
     return 0;
 }
@@ -75,12 +78,12 @@ sub _checkOneDir {
     my $self = shift;
     my $dirname = shift;
     my $filename = shift;
-    
+
     if (!$self->{_files}{$dirname}) {
 	$self->_readIgnore($dirname);
     }
-    
-    (my $basename = $filename) =~ s%.*\/%%g;
+
+    my $basename = (File::Spec->splitpath($filename))[2];
     #print "CK1 $dirname $basename\n";
     foreach my $re (@{$self->{_files}{$dirname}}) {
 	return 1 if ($basename =~ /$re/);
@@ -94,9 +97,9 @@ sub _checkOneDir {
 sub _readIgnore {
     my $self = shift;
     my $dirname = shift;
-    
+
     return if $self->{_files}{$dirname};	# Cached
-    my $fh = IO::File->new($dirname."/".$self->{filename},"r");
+    my $fh = IO::File->new(catfile($dirname,$self->{filename}),"r");
     $self->{_files}{$dirname} = [];
     if ($fh) {
 	local $/; undef $/; my $wholefile = <$fh>;

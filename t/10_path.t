@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Revision: 1.4 $$Date: 2004/07/19 22:57:37 $$Author: wsnyder $
+# $Revision: 1.6 $$Date: 2004/09/13 13:09:55 $$Author: ws150726 $
 # DESCRIPTION: Perl ExtUtils: Type 'make test' to test this package
 #
 # Copyright 2002-2004 by Wilson Snyder.  This program is free software;
@@ -9,8 +9,9 @@
 use strict;
 use Test;
 use Cwd qw(getcwd);
+use File::Spec::Functions;
 
-BEGIN { plan tests => 4 }
+BEGIN { plan tests => 5 }
 BEGIN { require "t/test_utils.pl"; }
 
 my $uppwd = getcwd();
@@ -24,11 +25,15 @@ ok(1);
 
 ok (P4::C4::Path::fileNoLinks('.')
     eq getcwd());
-ok (P4::C4::Path::fileNoLinks('bebop/./uptoo/../../down1')
-    eq getcwd()."/down1");
+ok (P4::C4::Path::fileNoLinks(catfile(catdir('bebop','.','uptoo','..','..'),'down1'))
+    eq catfile(getcwd(),"down1"));
+ok (P4::C4::Path::fileDePerforce("foo/bar/be/bop")
+    eq catfile(getcwd(),catdir("foo","bar","be","bop")));
 
-symlink ('..', 'to_dot_dot') ;
-ok (P4::C4::Path::fileNoLinks('to_dot_dot/down1')
-    eq "$uppwd/down1");
-
-
+if ($^O =~ /win/i) {
+    skip(1,1); # symlink not supported on windows
+} else {
+    eval { symlink ('..', 'to_dot_dot') ; };
+    ok (P4::C4::Path::fileNoLinks(catfile('to_dot_dot','down1'))
+	eq catfile($uppwd,"down1"));
+}

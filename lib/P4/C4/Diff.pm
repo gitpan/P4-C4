@@ -1,4 +1,4 @@
-# $Revision: 1.11 $$Date: 2004/08/26 15:04:20 $$Author: ws150726 $
+# $Revision: 1.2 $$Date: 2004/09/13 13:09:55 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -13,7 +13,7 @@
 # 
 ######################################################################
 
-package P4::C4::Sync;
+package P4::C4::Diff;
 require 5.006_001;
 
 use strict;
@@ -23,14 +23,14 @@ use Carp;
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.030';
+$VERSION = '2.031';
 
 #######################################################################
 #######################################################################
 #######################################################################
-# Sync Interface
+# Diff Interface
 
-package P4::C4::Sync::UI;
+package P4::C4::Diff::UI;
 use P4::C4::UI;
 use strict;
 our @ISA = qw( P4::C4::UI );
@@ -39,16 +39,17 @@ sub OutputInfo {
     my $self = shift;
     my $level = shift;
     my $data = shift;
-    if ($data =~ /- updating (\S+)/) {
-	$self->{c4self}{_files}{$1}{filename} = $1;
-	my $fref = $self->{c4self}{_files}{$1};
-	$fref->{updated} = 1;
-	$fref->{status} = 'C-sync' if ($fref->{status});
-	$fref->{status} ||= 'U-sync';
-    } elsif ($data =~ /(\S+) - must resolve/) {
-    } else {
-	print __PACKAGE__.": $level: $data\n" if $P4::C4::Debug;
-    }
+    return if ($data =~ /^==== /);
+}
+
+sub Diff {
+    my $self = shift;
+    my $f1 = shift;
+    my $f2 = shift;
+    my $flags = shift;
+    my $diff = shift;
+    $self->{differs} = $diff;
+    print __PACKAGE__.": DIFFERS $diff\n" if $P4::C4::Debug;
 }
 
 #######################################################################
@@ -57,16 +58,17 @@ sub OutputInfo {
 # OVERRIDE METHODS
 
 package P4::C4;
-sub syncFiles {   # Regular routine called sync
+sub differentFiles {   # Regular routine called diff
     my $self = shift;
     my @params = @_;
-    # Sync specified areas
-    for (my $i=0; $i<=$#params; $i++) {
-	$params[$i] .= "/..." if -d $params[$i];
-    }
-    print "sync @params\n" if $P4::C4::Debug;
-    my $ui = new P4::C4::Sync::UI(c4self=>$self);
-    $self->Run($ui, 'sync', @params);
+
+    # Return true if user exists
+    print "diff @params\n" if $P4::C4::Debug;
+    my $ui = new P4::C4::Diff::UI(c4self=>$self);
+    $self->DoPerlDiffs();
+    $self->Run($ui,'diff', @params);
+    print "  Does differ @params\n" if $P4::C4::Debug && $ui->{differs};
+    return $ui->{differs};
 }
 
 ######################################################################
@@ -78,11 +80,30 @@ __END__
 
 =head1 NAME
 
-P4::C4::Sync - Perforce Sync parsing
+P4::C4::Diff - Perforce Diff parsing
+
+=head1 SYNOPSIS
+
+  use P4::C4::Diff;
+
+  my $p4 = new P4::C4;
+  $p4->differentFiles (<params>)
+  ...
 
 =head1 DESCRIPTION
 
-This module is for internal P4::C4 use.
+This module provides utilities to retrieve Perforce difference information.
+
+=head1 METHODS
+
+=over 4
+
+=item $self->differentFiles ( args )
+
+Run a P4 diff operation with the given arguments, and return true if the
+files differ in any way.
+
+=back
 
 =head1 DISTRIBUTION
 

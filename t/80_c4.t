@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Revision: 1.4 $$Date: 2004/07/19 22:57:38 $$Author: wsnyder $
+# $Revision: 1.5 $$Date: 2004/09/13 13:09:55 $$Author: ws150726 $
 # DESCRIPTION: Perl ExtUtils: Type 'make test' to test this package
 #
 # Copyright 2002-2004 by Wilson Snyder.  This program is free software;
@@ -13,5 +13,5 @@ use Cwd;
 BEGIN { plan tests => 1 }
 BEGIN { require "t/test_utils.pl"; }
 
-run_system("${PERL} ./c4 info");
+run_system("${PERL} c4 info");
 ok(1);

@@ -1,4 +1,4 @@
-# $Revision: 1.14 $$Date: 2004/08/26 15:04:20 $$Author: ws150726 $
+# $Revision: 1.2 $$Date: 2004/09/13 13:09:55 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -19,7 +19,7 @@ use strict;
 use vars qw($VERSION);
 our @ISA = qw( P4::UI );
 
-$VERSION = '2.030';
+$VERSION = '2.031';
 
 sub new {
     my $class = shift;

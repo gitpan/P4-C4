@@ -1,4 +1,4 @@
-# $Revision: 1.12 $$Date: 2004/08/26 15:04:20 $$Author: ws150726 $
+# $Revision: 1.2 $$Date: 2004/09/13 13:09:55 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -14,22 +14,32 @@
 ######################################################################
 
 package P4::C4::Path;
+use File::Spec;
+use File::Spec::Functions;
 use Cwd qw(getcwd);
 use strict;
 
 require Exporter;
 our @ISA = ('Exporter');
 our @EXPORT = qw( fileNoLinks );
-our $VERSION = '2.030';
+our $VERSION = '2.031';
 
 ######################################################################
+
+sub isDepotFilename {
+    my $filename = shift;
+    return ($filename =~ m%^//%);
+}
 
 sub fileDePerforce {
     my $filename = shift;
     # Strip perforce specifics
     $filename =~ s/\.\.\.$//;
-    $filename =~ s/\/$//;
-    return fileNoLinks($filename);
+    $filename =~ s![/\\]$!!;
+    # On Windows, Repositories always use / but filenames want backslashes
+    # We'll take either, then make them native
+    my @dirs = split /[\\\/]/, $filename;
+    return fileNoLinks(catfile(@dirs));
 }
 
 sub fileNoLinks {
@@ -38,38 +48,38 @@ sub fileNoLinks {
     # Perforce doesn't allow "cd ~/sim/project" where project is a symlink!
     # Modified example from the web
 	
-    my @right = split /\//, $filename;
-	
-    if ($right[0] ne "") {  # relative
-	unshift @right, split /\//, getcwd();
-    }
-    my @left = shift @right;  # Should be empty, as we're absolute
+    $filename = File::Spec->rel2abs($filename);
+    my @right = File::Spec->splitdir($filename);
+    my @left;
 
     while (@right) {
-	#print "PARSE: ",join("/",@left),"  --- ",join("/",@right),"\n";
+	#print "PARSE: ",catfile(@left),"  --- ",catfile(@right),"\n";
 	my $item = shift @right;
-	next if $item eq "." or $item eq "";
-	
-	if ($item eq "..") {
+	next if $item eq ".";
+	if ($item eq "") {
+	    push @left, $item;
+	    next;
+	}
+	elsif ($item eq "..") {
 	    pop @left if @left > 1;
 	    next;
 	}
 	    
-	my $link = readlink (join "/", @left, $item);
+	my $link = readlink (catfile(@left, $item));
 	    
 	if (defined $link) {
-	    my @parts = split /\//, $link;
-	    if (@parts && ($parts[0] eq "")) { # absolute
-		@left = shift @parts;   # quick way
+	    if (file_name_is_absolute($link)) {
+		@left = File::Spec->splitdir($link);
+	    } else {
+		unshift @right, File::Spec->splitdir($link);
 	    }
-	    unshift @right, @parts;
 	    next;
 	} else {
 	    push @left, $item;
 	    next;
 	}
     }
-    my $out = join("/", @left);
+    my $out = catfile(@left);
     #print "ABS: $out\n";
     return $out;
 }
@@ -106,6 +116,10 @@ removing any ...'s, and symlinks.
 =item $self->fileNoLinks($filename)
 
 Resolve any symlinks in the given filename.
+
+=item $self->isDepotFilename($filename)
+
+Return true if the filename is a absolute depot file name.
 
 =back
 

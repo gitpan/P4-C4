@@ -1,4 +1,4 @@
-# $Revision: 1.12 $$Date: 2004/08/26 15:04:20 $$Author: ws150726 $
+# $Revision: 1.2 $$Date: 2004/09/13 13:09:55 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -13,7 +13,7 @@
 # 
 ######################################################################
 
-package P4::C4::User;
+package P4::C4::Info;
 require 5.006_001;
 
 use strict;
@@ -23,14 +23,14 @@ use Carp;
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.030';
+our $VERSION = '2.031';
 
 #######################################################################
 #######################################################################
 #######################################################################
-# User Interface
+# Info Interface
 
-package P4::C4::User::IsUI;
+package P4::C4::Info::UI;
 use P4::C4::UI;
 use strict;
 our @ISA = qw( P4::C4::UI );
@@ -41,8 +41,10 @@ sub OutputInfo {
     my $data = shift;
     if ($level==0) {
 	print __PACKAGE__.": $level: $data\n" if $P4::C4::Debug;
-	if ($data =~ /^$self->{user}\s/) {
-	    $self->{status} = $data;
+	if ($data =~ /^Client root:\s+(.*)$/i) {
+	    $self->{c4self}{clientRoot} = $1;
+	} elsif ($data =~ /^Server version:\s+(.*)$/i) {
+	    $self->{c4self}{serverVersion} = $1;
 	}
     } else {
 	die "$0: %Error: Bad p4 response: $data\n";
@@ -54,15 +56,30 @@ sub OutputInfo {
 #######################################################################
 # OVERRIDE METHODS
 
-package P4::Client;
-sub isUser {
+package P4::C4;
+sub _infoFetch {
     my $self = shift;
-    my $user = shift;
-    # Return true if user exists
-    print "isUser $user" if $P4::C4::Debug;
-    my $ui = new P4::C4::User::IsUI (user=>$user);
-    $self->Users($ui);
-    return $ui->{status}
+    print "_infoFetch\n" if $P4::C4::Debug;
+    my $ui = new P4::C4::Info::UI(c4self=>$self);
+    $self->Run($ui,'info');
+}
+
+sub clientRoot {
+    my $self = shift;
+    if (!$self->{clientRoot}) {
+	$self->_infoFetch();
+	print "clientRoot = ",$self->{clientRoot}||"","\n" if $P4::C4::Debug;
+    }
+    return $self->{clientRoot};  # Cached in $self
+}
+
+sub serverVersion {
+    my $self = shift;
+    if (!$self->{serverVersion}) {
+	$self->_infoFetch();
+	print "serverVersion = ",$self->{serverVersion}||"","\n" if $P4::C4::Debug;
+    }
+    return $self->{serverVersion};  # Cached in $self
 }
 
 ######################################################################
@@ -74,29 +91,34 @@ __END__
 
 =head1 NAME
 
-P4::C4::User - User utilities
+P4::C4::Info - Perforce Info parsing
 
 =head1 SYNOPSIS
 
-  use P4::C4::User;
+  use P4::C4::Info;
 
-  my $p4 = new P4::Client;
-  $p4->isUser("foo");
+  my $p4 = new P4::C4;
+  return $p4->clientRoot();
+  return $p4->serverVersion();
   ...
 
 =head1 DESCRIPTION
 
-This module provides utilities to operate on Perforce users.
+This module provides utilities to operate on Perforce global information.
 
 =head1 ACCESSORS
 
-There is a accessor for each parameter listed above.  In addition:
-
 =over 4
 
-=item $self->isUser ( \$username )
+=item $self->clientRoot()
 
-Returns true if the user exists.
+Returns the root directory of the client.  Note this is cached as long
+as the parent object exists.
+
+=item $self->serverVersion()
+
+Returns the server version of the client.  Note this is cached as long
+as the parent object exists.
 
 =back
 
@@ -114,6 +136,6 @@ Wilson Snyder <wsnyder@wsnyder.org>
 
 =head1 SEE ALSO
 
-L<P4::Client>, L<P4::C4>, 
+L<P4::Client>, L<P4::C4>
 
 =cut

@@ -1,4 +1,4 @@
-# $Id: Makefile.PL,v 1.11 2004/03/10 18:29:58 wsnyder Exp $
+# $Id: Makefile.PL,v 1.12 2004/09/01 13:45:52 ws150726 Exp $
 # DESCRIPTION: Perl ExtUtils: Type 'perl Makefile.PL' to create a Makefile for this package
 #
 # Copyright 2002-2004 by Wilson Snyder.  This program is free software;
@@ -44,8 +44,8 @@ WriteMakefile(
 	      DISTNAME	=> 'P4-C4',
 	      NAME	=> 'P4::C4',
 	      AUTHOR	=> 'Wilson Snyder <wsnyder@wsnyder.org>',
-	      ABSTRACT_FROM => 'C4.pm',
-	      VERSION_FROM  => 'C4.pm',
+	      ABSTRACT_FROM => 'lib/P4/C4.pm',
+	      VERSION_FROM  => 'lib/P4/C4.pm',
 	      PREREQ_PM => {'P4::Client' => 2.2279,
 			},
 	      EXE_FILES	=> [qw( c4 c4_job_edit )],
