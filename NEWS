@@ -6,6 +6,20 @@ The contributors that suggested a given feature is shown in [].
 	
 This uses outline mode in Emacs.  See C-h m [M-x describe-mode].
 
+* Changes in P4::C4 2.010 3/18/2003
+
+**	Added "c4 client-delete" command.
+
+**	Added "c4_job_edit" shell command.
+
+***	Add P4USER to .p4config file.  Thus if another user updates
+	the client, it will be under the correct owner of the area.
+
+***	c4 submit now has -f flag for suppressing up-to-date check.
+
+****	Fix bug with haveRev not set if file created during update
+
+
 * Changes in P4::C4 2.000 8/08/2002
 
 **	First CPAN Release
@@ -30,7 +44,7 @@ This uses outline mode in Emacs.  See C-h m [M-x describe-mode].
 
 
 ----------------------------------------------------------------------
-$Id: NEWS,v 1.3 2002/08/08 13:35:38 wsnyder Exp $
+$Id: NEWS,v 1.9 2003/03/18 16:00:10 wsnyder Exp $
 ----------------------------------------------------------------------
 Copyright information:
 

@@ -1,4 +1,4 @@
-# $Revision: 1.2 $$Date: 2002/07/30 20:01:00 $$Author: wsnyder $
+# $Revision: 1.4 $$Date: 2003/03/18 16:00:11 $$Author: wsnyder $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -31,7 +31,7 @@ use Carp;
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.000';
+$VERSION = '2.010';
 
 #######################################################################
 #######################################################################
@@ -48,9 +48,14 @@ sub submitCheckC4 {
     $self->clientRoot or die "%Error: Not inside a client spec, cd to inside one.\n";
 
     my @files;
+    my $force;
+
     my @cmdParsed = P4::Getopt->parseCmd('submit', @params);
     for (my $i=0; $i<=$#cmdParsed; $i++) {
-	if ($cmdParsed[$i] =~ /^file/
+	if ($params[$i] eq '-f') {
+	    $force = 1;
+	}
+	elsif ($cmdParsed[$i] =~ /^file/
 	    && $params[$i] !~ m%//%) {   # Not a perforce depot filename
 	    push @files, P4::C4::Path::fileDePerforce($params[$i]);
 	}
@@ -71,7 +76,7 @@ sub submitCheckC4 {
 	if ($fref->{clientMtime}   # Else might not be checking in this file.  Small danger of a missing "rm" but that's unlikely
 	    && ($fref->{oldMtime}||0) != ($fref->{clientMtime}||0)) {
 	    print "File date off $fref->{filename}\n" if $P4::C4::Debug;
-	    die "%Error: Must c4 update again before submitting\n";
+	    die "%Error: Must c4 update again before submitting\n" if !$force;
 	}
     }
 }

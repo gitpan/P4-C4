@@ -1,4 +1,4 @@
-# $Revision: 1.5 $$Date: 2002/07/25 02:50:56 $$Author: wsnyder $
+# $Revision: 1.7 $$Date: 2003/03/18 16:00:11 $$Author: wsnyder $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -28,7 +28,7 @@ use Carp;
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.000';
+$VERSION = '2.010';
 
 #######################################################################
 #######################################################################
@@ -57,10 +57,10 @@ sub OutputStat {
 		$fref->{$key} = $val;
 	    }
 	}
-	$fref->{depotExists} = $fref->{depotFile}
-                  && (($fref->{headAction}||'') eq 'add'
-		      || ($fref->{headAction}||'') eq 'branch'
-		      || ($fref->{headAction}||'') eq 'edit');
+	# add, branch, edit, integrate
+	$fref->{depotExists} = ($fref->{depotFile}
+				&& $fref->{headAction}
+				&& (($fref->{headAction}||'') ne 'delete'));
     }
 }
 

@@ -1,4 +1,4 @@
-# $Revision: 1.8 $$Date: 2002/08/08 13:35:38 $$Author: wsnyder $
+# $Revision: 1.12 $$Date: 2003/03/18 16:03:05 $$Author: wsnyder $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -21,6 +21,8 @@
 package P4::C4::Update;
 use strict;
 
+our $VERSION = '2.010';
+
 ######################################################################
 ######################################################################
 ######################################################################
@@ -40,6 +42,8 @@ sub update {
     my @params = @_;
 
     $self->clientRoot or die "%Error: Not inside a client spec, cd to inside one.\n";
+    # Not yet:
+    #$self->clientC4Managed or die "%Error: Client was not created by c4 client-create\n";
 
     my @files;
     foreach my $param (@params) {
@@ -174,7 +178,11 @@ sub _updateDiffers {
     my $self = shift;
     my $fref = shift;
     # Compare against what we HAVE, else someone else's change will be a diff
-    $fref->{differs} = $self->differentFiles('-f',$fref->{filename}."#".$fref->{haveRev});
+    if ($fref->{haveRev}) {
+	$fref->{differs} = $self->differentFiles('-f',$fref->{filename}."#".$fref->{haveRev});
+    } else {
+	$fref->{differs} = 0;
+    }
 }
 
 sub _updateAction {

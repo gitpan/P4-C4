@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl -w
-#$Id: c4,v 1.14 2002/07/25 19:06:05 wsnyder Exp $
+#$Id: c4,v 1.20 2003/03/18 15:58:00 wsnyder Exp $
 ######################################################################
 #
 # This program is Copyright 2002 by Wilson Snyder.
@@ -22,8 +22,8 @@
 require 5.6.0;
 use lib "blib/lib";
 use lib "blib/arch";
-#use lib "/home/wsnyder/SandBox/Tools/wsnyder/perltools/P4-C4/blib/lib";
-#use lib "/home/wsnyder/SandBox/Tools/wsnyder/perltools/P4-C4/blib/arch";
+use lib "/home/wsnyder/SandBox/Tools/wsnyder/perltools/P4-C4/blib/lib";
+use lib "/home/wsnyder/SandBox/Tools/wsnyder/perltools/P4-C4/blib/arch";
 
 use Getopt::Long;
 use IO::File;
@@ -127,20 +127,31 @@ chdir($didCwd) if $didCwd;   # Do last, else second file in list will be messed 
 @Opt_CmdParams = @cmdOut;
 
 # Execute comand
-if ($Opt_Cmd =~ /^client-create$/) {
+if ($Opt_Cmd eq "client-create") {
     cmd_client_create();
+} elsif ($Opt_Cmd eq "client-delete") {
+    cmd_client_delete();
 } elsif ($Opt_Cmd eq "get") {
     die "%Error: Use 'c4 update' instead of 'c4 get'.\n";
 } elsif ($Opt_Cmd eq "update") {
     cmd_update();
 } elsif ($Opt_Cmd eq "submit") {
-    cmd_submit();
+    #if (is_c4_managed()) {
+	cmd_submit();
+    #} else {
+    #	cmd_p4();
+    #}
 } elsif ($Opt_Cmd eq "sync") {
-    die "%Error: Use 'c4 update' instead of 'c4 sync'.\n";
+    #if (is_c4_managed()) {
+	die "%Error: Use 'c4 update' instead of 'c4 sync'.\n";
+    #} else {
+    #	cmd_p4();
+    #}
 } elsif ($Opt_Cmd eq "help") {
     if ($#Opt_CmdParams < 0) {
 	print "C4 Wrapper commands:\n";
 	print "\tc4      client-create -t <template> <client>\n";
+	print "\tc4      client-delete -d <client>\n";
 	print "\tc4 [-n] update [files...]\n";
 	print "\nP4 Help:\n";
     }
@@ -152,7 +163,7 @@ if ($Opt_Cmd =~ /^client-create$/) {
 #----------------------------------------------------------------------
 
 sub usage {
-    print '$Id: c4,v 1.14 2002/07/25 19:06:05 wsnyder Exp $ ', "\n";
+    print '$Id: c4,v 1.20 2003/03/18 15:58:00 wsnyder Exp $ ', "\n";
     pod2usage(-verbose=>2, -exitval => 2);
     exit (1);
 }
@@ -184,6 +195,13 @@ sub parameter {
 #######################################################################
 # Commands invoked by the user
 
+sub is_c4_managed {
+    my $p4 = new P4::C4;
+    $P4Opt->setClientOpt($p4);
+    $p4->Init() or die "$0: %Error: Failed to connect to Perforce Server\n";
+    return $p4->clientC4Managed();
+}
+
 sub cmd_p4 {
     # Call c4 using all the default parameters from the command line
     my $cmd = "p4 ";
@@ -212,6 +230,15 @@ sub cmd_client_create {
     $p4->createClient('-c4', '-rmdir', @Opt_CmdParams);
 }
 
+sub cmd_client_delete {
+    print "cmd_client_delete ",join(' ',@Opt_CmdParams),"\n"  if $Debug;
+
+    my $p4 = new P4::C4;
+    $P4Opt->setClientOpt($p4);
+    $p4->Init() or die "$0: %Error: Failed to connect to Perforce Server\n";
+    $p4->clientDelete(@Opt_CmdParams);
+}
+
 sub cmd_update {
     print "cmd_update ",join(' ',@Opt_CmdParams),"\n"  if $Debug;
 
@@ -226,6 +253,8 @@ sub cmd_submit {
     my $p4 = new P4::C4(opt=>$P4Opt);
     $p4->Init() or die "$0: %Error: Failed to connect to Perforce Server\n";
     $p4->submitCheckC4(@Opt_CmdParams);
+    my @pars = @Opt_CmdParams;  @Opt_CmdParams = ();
+    foreach my $par (@pars) { push @Opt_CmdParams,$par if $par ne "-f"; }
     cmd_p4();
 }
 
@@ -241,7 +270,9 @@ c4 - CVSish wrapper for perforce p4 program
 =head1 SYNOPSIS
 
     c4        help
+
     c4        client-create -t <template> <client>
+    c4        client-delete -d -f <client>
     c4 [-n]   update
 
     c4 I<any p4 command>
@@ -251,11 +282,6 @@ c4 - CVSish wrapper for perforce p4 program
 
 =head1 DESCRIPTION
 
-C4 makes C<p4> seem more like C<cvs> by having all files writable by
-default.
-
-C4 adds several commands (update/client_create), see the COMMANDS section.
-
 C4 allows a default user, see the ENVIRONMENT section.
 
 When passed a filename on any c4 command, c4 makes the filename absolute,
@@ -263,6 +289,10 @@ with all symlinks reduced, and chdir's if possible to the first such
 filename.  If the argument is a directory, a /... is appended.  This makes
 it a lot more likely that perforce commands will work when issued from
 outside a client area.  (For example: c4 add /my/area/boo/blaz.)
+
+When a client is created in a special way, C4 makes C<p4> seem more like
+C<cvs> by having all files writable by default.  C4 adds several commands
+(update/client_create) to support this, see the COMMANDS section.
 
 =head1 COMMANDS
 
@@ -284,9 +314,35 @@ Create a client specification, making sure it gets named, and setting the
 clobber, allwrite, and rmdir attributes as required for c4 update.  Also,
 create a .p4config file with the name of the client in it.
 
+=item client-delete -d <client>
+
+Delete a client specification in a way which leaves the database as clean
+as possible.  Consists of the followint steps:
+
+=over 4
+
+C<p4 revert ...> to make sure no files are left open.
+
+C<p4 client> to edit the spec to remove any View: lines.
+
+C<p4 sync> to remove the views that were deleted from the file system.
+
+C<p4 client -d> to remove the client spec.
+
+C<rm .p4config> to cleanup the local directory.
+
+=back
+
 =item rm [-c changelist] file...
 
 Alias for C<c4 delete>.
+
+=item submit [-f] [normal p4 args]
+
+This performs a p4 submit.  In addition, it prints an error if the area is
+not up to date before submitting.  -f overrides this check.  Use -f
+carefuly as edited files may not yet be opened for editing as they would be
+if the update was done.
 
 =item update [-n] [file...]
 
@@ -304,7 +360,7 @@ in the depot.
 
 C<p4 sync> to get recent changes.
 
-Look for any unknown files.
+Look for any unknown files not in a .cvsignore file.
 
 =back
 
@@ -384,6 +440,7 @@ As with CVS, comments are NOT supported!
 =head1 SEE ALSO
 
 C<c4>
+C<c4_job_edit>
 C<P4::C4>
 C<p4>
 

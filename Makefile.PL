@@ -1,4 +1,4 @@
-# $Id: Makefile.PL,v 1.4 2002/08/08 13:35:37 wsnyder Exp $
+# $Id: Makefile.PL,v 1.6 2003/03/11 20:13:37 wsnyder Exp $
 # DESCRIPTION: Perl ExtUtils: Type 'perl Makefile.PL' to create a Makefile for this package
 
 require 5.005;
@@ -36,9 +36,9 @@ WriteMakefile(
 	      AUTHOR	=> 'Wilson Snyder <wsnyder@wsnyder.org>',
 	      ABSTRACT_FROM => 'C4.pm',
 	      VERSION_FROM  => 'C4.pm',
-	      PREREQ_PM => {'P4::Client' => 1.1980,
+	      PREREQ_PM => {'P4::Client' => 2.2279,
 			},
-	      EXE_FILES	=> [qw( c4 )],
+	      EXE_FILES	=> [qw( c4 c4_job_edit )],
 	      'clean'	=> {FILES => 'test_store', },
 	      'dist'	=> {COMPRESS => 'gzip -9f',
 			    SUFFIX   => '.gz', 

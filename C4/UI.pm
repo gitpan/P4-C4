@@ -1,4 +1,4 @@
-# $Revision: 1.4 $$Date: 2002/07/24 17:11:16 $$Author: wsnyder $
+# $Revision: 1.7 $$Date: 2003/03/18 16:03:05 $$Author: wsnyder $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -21,7 +21,10 @@
 package P4::C4::UI;
 use P4::UI;
 use strict;
+use vars qw($VERSION);
 our @ISA = qw( P4::UI );
+
+$VERSION = '2.010';
 
 sub new {
     my $class = shift;
@@ -37,6 +40,7 @@ sub OutputInfo($$) {
     return if $data =~ /- opened for edit/;
     return if $data =~ /- refreshing /;
     return if $data =~ /^Client .* saved$/;
+    return if $data =~ /^Client .* deleted$/;
     return if $data =~ /^Client .* not changed$/;
     warn "$0: %Warn: Unexpected P4 Response: $data\n" if $P4::C4::Debug;
 }
@@ -44,6 +48,8 @@ sub OutputInfo($$) {
 sub OutputError($) {
     my ($self, $err) = @_;
     return if $err =~ /- file.s. up-to-date/;
+    return if $err =~ /not opened on this client/ && $self->{noneOpenOk};
+    return if $err =~ /File\(s\) not in client view/ && $self->{noneOpenOk};
     die "$0: %Error: P4 Error: $err\n";
 }
 

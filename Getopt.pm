@@ -1,4 +1,4 @@
-# $Revision: 1.10 $$Date: 2002/07/24 20:00:27 $$Author: wsnyder $
+# $Revision: 1.14 $$Date: 2003/03/18 16:00:10 $$Author: wsnyder $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -30,7 +30,7 @@ use Cwd;
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.000';
+$VERSION = '2.010';
 
 #p4 -s -c <client> -d <pwd> -H <host> -p <port> -P <password> -u <user> -C <charset> 
 
@@ -59,8 +59,8 @@ $VERSION = '2.000';
   'depot'	=>'[-i] [-o] [-d] depotname',
   'depots'	=>'',
   'describe'	=>'[-dn] [-dc] [-ds] [-du] [-s] changelist',
-  'diff'	=>'[-dflag] [-f] [-sa] [-sd] [-se] [-sr] [-t] [filerev...]',
-  'diff2'	=>'[-dflag] [-q] [-t] [-b branch] [filerev] [filerev2]',
+  'diff'	=>'[-d*] [-f] [-sa] [-sd] [-se] [-sr] [-t] [filerev...]',
+  'diff2'	=>'[-d*] [-q] [-t] [-b branch] [filerev] [filerev2]',
   'dirs'	=>'[-C] [-D] [-H] [-t type] depotdirectory...',
   'edit'	=>'[-c changelist] [-t type] file...',
   'filelog'	=>'[-i] [-l] [-m maxrev] file...',
@@ -96,7 +96,6 @@ $VERSION = '2.000';
   'review'	=>'[-c changelist] [-t countername]',
   'reviews'	=>'[-c changelist] [file...]',
   'set'		=>'[-s] [-S svcname] [varvalue]',
-  'submit'	=>'[-i] [-r] [-c changelist] [-s] [files]',
   'sync'	=>'[-f] [-n] [files...]',
   'triggers'	=>'[-i] [-o]',
   'typemap'	=>'[-i] [-o]',
@@ -105,9 +104,12 @@ $VERSION = '2.000';
   'users'	=>'[user...]',
   'verify'	=>'[-q] [-u] [-v] file...',
   'where'	=>'[file...]',
+  # Flags added      
+  'submit'	=>'[-i] [-f] [-r] [-c changelist] [-s] [files]',  # Added -f
   # C4's own
   'client-create' =>'[-i] [-o] [-d] [-f] [-rmdir] [-c4] [-t template] [client]',
-  'update'	=>'[-n] [files...]',
+  'client-delete' =>'[-d] [-f] [client]',
+  'update'	=>'[-n] [-f] [files...]',
 );
 
 #######################################################################
@@ -302,9 +304,13 @@ sub parseCmd {
     my $inSwitch;
     $paramNum = 0;
     foreach my $arg (@args) {
+	my $argone = substr($arg,0,2)."*";   #  -dw -> -d* for diff detection
 	if ($arg =~ /^-/ && $parser{$arg}) {
 	    push @out, $parser{$arg}{what};
 	    $inSwitch = $parser{$arg}{then};
+	} elsif ($arg =~ /^-/ && $parser{$argone}) {
+	    push @out, $parser{$argone}{what};
+	    $inSwitch = $parser{$argone}{then};
 	} else {
 	    if ($inSwitch) {   # Argument to a switch
 		push @out, $inSwitch;

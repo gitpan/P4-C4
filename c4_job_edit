@@ -1,0 +1,174 @@
+#!/usr/local/bin/perl -w
+#$Id: c4_job_edit,v 1.2 2003/03/11 20:27:24 wsnyder Exp $
+######################################################################
+#
+# This program is Copyright 2002 by Wilson Snyder.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of either the GNU General Public License or the
+# Perl Artistic License.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the Perl Artistic License
+# along with this module; see the file COPYING.  If not, see
+# www.cpan.org
+#                                                                           
+######################################################################
+
+require 5.6.0;
+use lib "blib/lib";
+use lib "blib/arch";
+#use lib "/home/wsnyder/SandBox/Tools/wsnyder/perltools/P4-C4/blib/lib";
+#use lib "/home/wsnyder/SandBox/Tools/wsnyder/perltools/P4-C4/blib/arch";
+
+use Getopt::Long;
+use IO::File;
+use Pod::Usage;
+use strict;
+
+use vars qw ($Debug);
+
+#======================================================================
+# main
+
+$Debug = 0;
+our @Opt_Params = ();
+our $Opt_Filename;
+
+Getopt::Long::config ("pass_through", "no_auto_abbrev");
+if (! GetOptions (
+		  "help"	=> \&usage,
+		  "debug"	=> \&debug,
+		  "<>"		=> \&parameter,
+		  )) {
+    usage();
+}
+
+if (!defined $Opt_Filename) {
+    warn "%Error: $0: Can't determine filename to edit\n";
+    usage();
+}
+
+edit_comment_jobs($Opt_Filename);
+exec @Opt_Params;
+die "%Error: $0: ".join(' ',@Opt_Params);
+
+#----------------------------------------------------------------------
+
+sub usage {
+    print '$Id: c4_job_edit,v 1.2 2003/03/11 20:27:24 wsnyder Exp $ ', "\n";
+    pod2usage(-verbose=>2, -exitval => 2);
+    exit (1);
+}
+
+sub debug {
+    $Debug = 1;
+}
+
+sub parameter {
+    my $param = shift;
+    push @Opt_Params, $param;
+    if ($param !~ /^-/) {
+	$Opt_Filename = $param;
+    }
+}
+ 
+#######################################################################
+#######################################################################
+#######################################################################
+
+sub edit_comment_jobs {
+    my $filename = shift;
+
+    print "edit_comment_jobs $filename\n" if $Debug;
+
+    # Read the template
+    my $ifh = IO::File->new($filename) or die "%Error: $! $filename,";
+    my $wholefile = join('',$ifh->getlines);
+    $ifh->close();
+
+    # Edits
+    my $out = "";
+    my $jobs;
+    my $change_spec;
+    foreach my $line (split /\n/, $wholefile) {
+	$line =~ s/\b(Host:\t)\S+/$1/mg;
+	if ($line =~ /A Perforce Change Spec/i) {
+	    $change_spec = 1;
+	} elsif ($change_spec && $line =~ /^Jobs:/) {
+	    $jobs=1;
+	}
+	elsif ($jobs) {
+	    if ($line !~ /^\t/i) {
+		$jobs=0;
+	    } elsif ($line !~ /^\#/i) {
+		$out .= "#";
+	    }
+	}
+	$out .= "$line\n";
+    }
+
+    # Write it back
+    my $fh = IO::File->new($filename,"w") or die "%Error: $! $filename,";
+    print $fh $out;
+    $fh->close();
+}
+
+#######################################################################
+__END__
+
+=pod
+
+=head1 NAME
+
+c4_job_edit - Pass command line on to editor after commenting out Jobs
+
+=head1 SYNOPSIS
+
+    c4_job_edit [editor_arguments]
+
+=head1 DESCRIPTION
+
+C4_job_edit edits the final non switch argument on the command line
+to comment out all Job: lines.  It then passes all remaining arguments
+to the default editor program.
+
+This prevents false closing of jobs by requiring the user to opt-in to
+closing bugs, rather then the default opt-out policy.
+
+To use this program, simply set the P4EDITOR environment variable in your
+default startup script.
+
+    setenv EDITOR="emacs"
+    setenv P4EDITOR="c4_job_edit $EDITOR"
+
+=head1 ARGUMENTS
+
+=over 4
+
+=item --help
+
+Displays this message and program version and exits.
+
+=back
+
+=head1 SEE ALSO
+
+C<c4>
+C<P4::C4>
+C<p4>
+
+=head1 AUTHORS
+
+Wilson Snyder <wsnyder@wsnyder.org>
+
+=cut
+
+######################################################################
+### Local Variables:
+### compile-command: "./c4_job_edit c4_job_edit"
+### End:

@@ -1,5 +1,5 @@
 # VHier.pm -- Test running utilities
-# $Revision: 1.10 $$Date: 2002/07/25 02:50:56 $$Author: wsnyder $
+# $Revision: 1.11 $$Date: 2003/03/18 16:00:04 $$Author: wsnyder $
 ######################################################################
 #
 # This program is Copyright 2002 by Wilson Snyder.
@@ -49,7 +49,7 @@ our @ISA = qw (P4::Client);
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.000';
+$VERSION = '2.010';
 
 ######################################################################
 #### Creators

@@ -1,4 +1,4 @@
-# $Revision: 1.4 $$Date: 2002/08/08 13:35:38 $$Author: wsnyder $
+# $Revision: 1.6 $$Date: 2003/03/18 16:00:11 $$Author: wsnyder $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -28,7 +28,7 @@ use Carp;
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.000';
+$VERSION = '2.010';
 
 #######################################################################
 #######################################################################
@@ -70,6 +70,7 @@ sub differentFiles {   # Regular routine called diff
     # Return true if user exists
     print "diff @params\n" if $P4::C4::Debug;
     my $ui = new P4::C4::Diff::UI(c4self=>$self);
+    $self->DoPerlDiffs();
     $self->Run($ui,'diff', @params);
     print "  Does differ @params\n" if $P4::C4::Debug && $ui->{differs};
     return $ui->{differs};

@@ -1,4 +1,4 @@
-# $Revision: 1.6 $$Date: 2002/07/24 17:53:13 $$Author: wsnyder $
+# $Revision: 1.8 $$Date: 2003/03/18 16:03:05 $$Author: wsnyder $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -21,6 +21,8 @@
 package P4::C4::File;
 use DirHandle;
 use strict;
+
+our $VERSION = '2.010';
 
 sub new {
     my $class = shift;

@@ -20,6 +20,7 @@ Makefile.PL
 NEWS
 README
 c4
+c4_job_edit
 readme.texi
 t/10_path.t
 t/20_getopt.opt
@@ -27,5 +28,6 @@ t/20_getopt.t
 t/30_ignore.t
 t/40_user.t
 t/45_info.t
+t/46_client.t
 t/80_c4.t
 t/test_utils.pl
