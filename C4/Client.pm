@@ -1,4 +1,4 @@
-# $Revision: 1.12 $$Date: 2003/03/18 16:00:11 $$Author: wsnyder $
+# $Revision: 1.15 $$Date: 2003/08/06 15:29:58 $$Author: wsnyder $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -19,7 +19,7 @@
 ######################################################################
 
 package P4::C4::Client;
-require 5.6.0;
+require 5.006_001;
 
 use strict;
 use vars qw($VERSION);
@@ -32,7 +32,7 @@ use P4::C4::Info;
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.010';
+$VERSION = '2.020';
 
 #######################################################################
 #######################################################################
@@ -160,6 +160,9 @@ sub OutputInfo {
 # OVERRIDE METHODS
 
 package P4::C4;
+use File::Path;
+use Cwd;
+
 sub createClient {
     my $self = shift;
     my @args = @_;  # allwrite, clobber, rmdir, c4
@@ -225,6 +228,20 @@ sub clientDelete {
     my $root = $self->clientRoot;
     defined $root or die "%Error: Client '$opts{client}[0]' doesn\'t exist.\n";
     print "Root $root\n" if $P4::C4::Debug;
+    my $madedir;
+    if (-r $root) {
+	print "Deleting client $opts{client}[0] and client directory $root...\n";
+    } else {
+	print "Deleting client $opts{client}[0] and empty client directory $root...\n";
+	$madedir = 1;
+	mkpath $root;
+	(-r $root) or die "%Error: Can't create directory: $root\n";
+    }
+
+    # Chdir
+    my $orig_pwd = getcwd();
+    chdir($root);
+    $self->SetCwd($root);
 
     my $ui = new P4::C4::UI(c4self=>$self, noneOpenOk=>1);
 
@@ -248,6 +265,10 @@ sub clientDelete {
     # Delete created files
     unlink("$root/.c4cache");
     unlink("$root/.p4config");
+    rmdir $root if $madedir;
+
+    chdir $orig_pwd;
+    $self->SetCwd($orig_pwd);
 
     return 1;
 }

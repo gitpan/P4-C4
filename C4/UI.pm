@@ -1,4 +1,4 @@
-# $Revision: 1.7 $$Date: 2003/03/18 16:03:05 $$Author: wsnyder $
+# $Revision: 1.9 $$Date: 2003/08/06 15:29:58 $$Author: wsnyder $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -24,7 +24,7 @@ use strict;
 use vars qw($VERSION);
 our @ISA = qw( P4::UI );
 
-$VERSION = '2.010';
+$VERSION = '2.020';
 
 sub new {
     my $class = shift;
@@ -39,6 +39,7 @@ sub OutputInfo($$) {
     return if $data =~ /- was edit, reverted/;
     return if $data =~ /- opened for edit/;
     return if $data =~ /- refreshing /;
+    return if $data =~ /- deleted as /;
     return if $data =~ /^Client .* saved$/;
     return if $data =~ /^Client .* deleted$/;
     return if $data =~ /^Client .* not changed$/;

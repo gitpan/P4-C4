@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl -w
-#$Id: c4_job_edit,v 1.2 2003/03/11 20:27:24 wsnyder Exp $
+#$Id: c4_job_edit,v 1.4 2003/06/18 15:38:30 wsnyder Exp $
 ######################################################################
 #
 # This program is Copyright 2002 by Wilson Snyder.
@@ -19,7 +19,7 @@
 #                                                                           
 ######################################################################
 
-require 5.6.0;
+require 5.006_001;
 use lib "blib/lib";
 use lib "blib/arch";
 #use lib "/home/wsnyder/SandBox/Tools/wsnyder/perltools/P4-C4/blib/lib";
@@ -60,7 +60,7 @@ die "%Error: $0: ".join(' ',@Opt_Params);
 #----------------------------------------------------------------------
 
 sub usage {
-    print '$Id: c4_job_edit,v 1.2 2003/03/11 20:27:24 wsnyder Exp $ ', "\n";
+    print '$Id: c4_job_edit,v 1.4 2003/06/18 15:38:30 wsnyder Exp $ ', "\n";
     pod2usage(-verbose=>2, -exitval => 2);
     exit (1);
 }
@@ -113,9 +113,11 @@ sub edit_comment_jobs {
     }
 
     # Write it back
-    my $fh = IO::File->new($filename,"w") or die "%Error: $! $filename,";
-    print $fh $out;
-    $fh->close();
+    if ($out ne $wholefile) {
+	my $fh = IO::File->new($filename,"w") or die "%Error: $! $filename,";
+	print $fh $out;
+	$fh->close();
+    }
 }
 
 #######################################################################

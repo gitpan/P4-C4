@@ -6,6 +6,13 @@ The contributors that suggested a given feature is shown in [].
 	
 This uses outline mode in Emacs.  See C-h m [M-x describe-mode].
 
+* Changes in P4::C4 2.020 8/6/2003
+
+**	Added "c4 unknown" command.
+
+***	Fixed "c4 client-delete" when the client dir no longer exists.
+
+
 * Changes in P4::C4 2.010 3/18/2003
 
 **	Added "c4 client-delete" command.
@@ -44,7 +51,7 @@ This uses outline mode in Emacs.  See C-h m [M-x describe-mode].
 
 
 ----------------------------------------------------------------------
-$Id: NEWS,v 1.9 2003/03/18 16:00:10 wsnyder Exp $
+$Id: NEWS,v 1.12 2003/08/06 15:29:58 wsnyder Exp $
 ----------------------------------------------------------------------
 Copyright information:
 

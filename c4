@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl -w
-#$Id: c4,v 1.20 2003/03/18 15:58:00 wsnyder Exp $
+#$Id: c4,v 1.22 2003/07/03 15:26:25 wsnyder Exp $
 ######################################################################
 #
 # This program is Copyright 2002 by Wilson Snyder.
@@ -19,7 +19,7 @@
 #                                                                           
 ######################################################################
 
-require 5.6.0;
+require 5.006_001;
 use lib "blib/lib";
 use lib "blib/arch";
 use lib "/home/wsnyder/SandBox/Tools/wsnyder/perltools/P4-C4/blib/lib";
@@ -135,6 +135,8 @@ if ($Opt_Cmd eq "client-create") {
     die "%Error: Use 'c4 update' instead of 'c4 get'.\n";
 } elsif ($Opt_Cmd eq "update") {
     cmd_update();
+} elsif ($Opt_Cmd eq "unknown") {
+    cmd_unknown();
 } elsif ($Opt_Cmd eq "submit") {
     #if (is_c4_managed()) {
 	cmd_submit();
@@ -163,7 +165,7 @@ if ($Opt_Cmd eq "client-create") {
 #----------------------------------------------------------------------
 
 sub usage {
-    print '$Id: c4,v 1.20 2003/03/18 15:58:00 wsnyder Exp $ ', "\n";
+    print '$Id: c4,v 1.22 2003/07/03 15:26:25 wsnyder Exp $ ', "\n";
     pod2usage(-verbose=>2, -exitval => 2);
     exit (1);
 }
@@ -258,6 +260,14 @@ sub cmd_submit {
     cmd_p4();
 }
 
+sub cmd_unknown {
+    print "cmd_unknown ",join(' ',@Opt_CmdParams),"\n"  if $Debug;
+
+    my $p4 = new P4::C4(opt=>$P4Opt);
+    $p4->Init() or die "$0: %Error: Failed to connect to Perforce Server\n";
+    $p4->unknown(@Opt_CmdParams);
+}
+
 #######################################################################
 __END__
 
@@ -274,6 +284,7 @@ c4 - CVSish wrapper for perforce p4 program
     c4        client-create -t <template> <client>
     c4        client-delete -d -f <client>
     c4 [-n]   update
+    c4        unknown
 
     c4 I<any p4 command>
        i.e.:  c4 add <file>
@@ -381,6 +392,12 @@ causing that message, and what may happen on a update.
 
 Unknown files (?) should be ignored with a .cvsignore file as described in
 the FILES section.
+
+=item unknown [file...]
+
+Prints files that are not known to perforce, and do not have a .cvsignore
+line.  This is similar to the '?' lines printed by "c4 update -n", however
+"c4 unknown" may be used with standard perforce clients.
 
 =back
 

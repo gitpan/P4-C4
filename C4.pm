@@ -1,5 +1,5 @@
 # VHier.pm -- Test running utilities
-# $Revision: 1.11 $$Date: 2003/03/18 16:00:04 $$Author: wsnyder $
+# $Revision: 1.14 $$Date: 2003/07/03 15:26:24 $$Author: wsnyder $
 ######################################################################
 #
 # This program is Copyright 2002 by Wilson Snyder.
@@ -20,7 +20,7 @@
 ######################################################################
 
 package P4::C4;
-require 5.6.0;
+require 5.006_001;
 use File::Find;
 
 use Carp;
@@ -38,6 +38,7 @@ use P4::C4::Path;
 use P4::C4::Submit;
 use P4::C4::Sync;
 use P4::C4::UI;
+use P4::C4::Unknown;
 use P4::C4::Update;
 use P4::C4::User;
 
@@ -49,7 +50,7 @@ our @ISA = qw (P4::Client);
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.010';
+$VERSION = '2.020';
 
 ######################################################################
 #### Creators
