@@ -1,4 +1,4 @@
-# $Revision: 1.4 $$Date: 2004/10/15 14:16:42 $$Author: ws150726 $
+# $Revision: 1.1 $$Date: 2004/09/14 19:07:35 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -13,10 +13,32 @@
 # 
 ######################################################################
 
-package P4::C4::Unknown;
+package P4::C4::ChangeMax;
 use strict;
 
-our $VERSION = '2.032';
+our $VERSION = '2.040';
+
+#######################################################################
+#######################################################################
+#######################################################################
+# ChangeMax Interface
+
+package P4::C4::ChangeMax::UI;
+use P4::C4::UI;
+use strict;
+our @ISA = qw( P4::C4::UI );
+
+sub OutputInfo($$) {
+    my ($self, $level, $data) = @_;
+    if ($data =~ /\s+-\s+.*\s+change\s+(\d+)/) {
+	my $chgnum = $1;
+	if (!$self->{maxChange} || $chgnum > $self->{maxChange}) {
+	    $self->{maxChange} = $chgnum;
+	}
+    } else {
+	warn "$0: %Warn: Unexpected P4 Response: $data\n" if $P4::C4::Debug;
+    }
+}
 
 ######################################################################
 ######################################################################
@@ -25,26 +47,19 @@ our $VERSION = '2.032';
 
 package P4::C4;
 use P4::C4::Info;
-use P4::C4::Cache;
-use P4::C4::Ignore;
-use P4::C4::Diff;
-use P4::C4::Sync;
 use Data::Dumper;
 use strict;
 
-sub unknown {
+sub changeMax {
     my $self = shift;
     my @params = @_;
 
     $self->clientRoot or die "%Error: Not inside a client spec, cd to inside one.\n";
 
     my @files;
-    my $add;
     foreach my $param (@params) {
-	if ($param eq '-a') {
-	    $add = 1;
-	} elsif ($param =~ /^-/) {
-	    die "%Error: Unrecognized 'c4 unknown' parameter: $param\n";
+	if ($param =~ /^-/) {
+	    die "%Error: Unrecognized 'c4 change-max' parameter: $param\n";
 	} else {
 	    push @files, P4::C4::Path::fileDePerforce($param);
 	}
@@ -53,31 +68,13 @@ sub unknown {
     push @files, $self->clientRoot if $#files<0;
 
     # Grab status
-    foreach my $file (@files) {
-	$self->findFiles($file);
-	$self->fstatFiles($file);
+    my $ui = new P4::C4::ChangeMax::UI(c4self=>$self);
+    foreach my $filename (@files) {
+	$filename = catfile($filename,"...") if -d $filename;
+	$self->Files($ui, $filename);
     }
 
-    # Print stats
-    $self->ignoredFiles();
-    foreach my $fref (sort {$a->{filename} cmp $b->{filename}}
-		      (values %{$self->{_files}})) {
-	next if $fref->{action};
-	my $stat = $fref->{status};  # May be defined or not
-	if ($fref->{unknown}) {
-	    if ($add) {
-		$stat ||= 'a-    ';
-		my $ui = new P4::C4::UI();
-		$self->Add($ui, $fref->{filename});
-	    } else {
-		$stat ||= '?-    ';
-	    }
-	}
-	if ($stat) {
-	    $stat =~ s/-.*$// if !$P4::C4::Debug;
-	    print $stat." ".$fref->{filename}."\n";
-	}
-    }
+    return $ui->{maxChange};
 }
 
 ######################################################################
@@ -89,11 +86,11 @@ __END__
 
 =head1 NAME
 
-P4::C4::Unknown - Print unknown files
+P4::C4::ChangeMax - Return maximum change number
 
 =head1 DESCRIPTION
 
-This module implements the C4 unknown command.
+This module returns the maximum change number of the specified files.
 
 =head1 DISTRIBUTION
 

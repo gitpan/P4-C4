@@ -1,5 +1,5 @@
 # VHier.pm -- Test running utilities
-# $Revision: 1.2 $$Date: 2004/09/13 13:09:55 $$Author: ws150726 $
+# $Revision: 1.4 $$Date: 2004/10/15 14:16:42 $$Author: ws150726 $
 ######################################################################
 #
 # Copyright 2002-2004 by Wilson Snyder.  This program is free software;
@@ -22,6 +22,7 @@ use P4::Client;
 # Our stuff
 use P4::Getopt;
 use P4::C4::Cache;
+use P4::C4::ChangeMax;
 use P4::C4::Client;
 use P4::C4::Diff;
 use P4::C4::File;
@@ -44,7 +45,7 @@ our @ISA = qw (P4::Client);
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.031';
+$VERSION = '2.032';
 
 ######################################################################
 #### Creators

@@ -8,6 +8,7 @@ c4
 c4_job_edit
 lib/P4/C4.pm
 lib/P4/C4/Cache.pm
+lib/P4/C4/ChangeMax.pm
 lib/P4/C4/Client.pm
 lib/P4/C4/Diff.pm
 lib/P4/C4/File.pm

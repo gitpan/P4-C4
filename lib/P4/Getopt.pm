@@ -1,4 +1,4 @@
-# $Revision: 1.3 $$Date: 2004/09/13 13:09:55 $$Author: ws150726 $
+# $Revision: 1.6 $$Date: 2004/10/15 14:16:42 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -25,7 +25,7 @@ use Cwd;
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.031';
+$VERSION = '2.032';
 
 #p4 -s -c <client> -d <pwd> -H <host> -p <port> -P <password> -u <user> -C <charset> 
 
@@ -104,11 +104,12 @@ $VERSION = '2.031';
   'submit'	=>'[-p4] [-i] [-f] [-r] [-c changelist] [-s] [files]',  # Added -f, -p4
   'sync'	=>'[-p4] [-f] [-n] [files...]',  # Added -p4
   # C4's own
+  'change-max'	  =>'[files...]',
   'client-create' =>'[-i] [-o] [-d] [-f] [-rmdir] [-c4] [-t template] [client]',
   'client-delete' =>'[-d] [-f] [client]',
-  'update'	  =>'[-n] [-f] [files...]',
-  'unknown'	  =>'[files...]',
   'help-summary'  =>'',
+  'unknown'	  =>'[-a] [files...]',
+  'update'	  =>'[-n] [-f] [files...]',
 );
 
 #######################################################################

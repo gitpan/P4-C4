@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-#$Id: c4,v 1.34 2004/09/13 13:09:54 ws150726 Exp $
+#$Id: c4,v 1.36 2004/10/15 14:15:32 ws150726 Exp $
 ######################################################################
 #
 # Copyright 2002-2004 by Wilson Snyder.  This program is free software;
@@ -127,7 +127,9 @@ chdir($didCwd) if $didCwd;   # Do last, else second file in list will be messed 
 @Opt_CmdParams = @cmdOut;
 
 # Execute comand
-if ($Opt_Cmd eq "client-create") {
+if ($Opt_Cmd eq "change-max") {
+    cmd_change_max();
+} elsif ($Opt_Cmd eq "client-create") {
     cmd_client_create();
 } elsif ($Opt_Cmd eq "client-delete") {
     cmd_client_delete();
@@ -166,6 +168,7 @@ if ($Opt_Cmd eq "client-create") {
 	print "C4 Wrapper commands:\n";
 	print "\tc4      --help\n";
 	print "\tc4      help-summary\n";
+	print "\tc4      change-max\n";
 	print "\tc4      client-create -t <template> <client>\n";
 	print "\tc4      client-delete -d <client>\n";
 	print "\tc4 [-n] update [files...]\n";
@@ -179,7 +182,7 @@ if ($Opt_Cmd eq "client-create") {
 #----------------------------------------------------------------------
 
 sub usage {
-    print '$Id: c4,v 1.34 2004/09/13 13:09:54 ws150726 Exp $ ', "\n";
+    print '$Id: c4,v 1.36 2004/10/15 14:15:32 ws150726 Exp $ ', "\n";
     pod2usage(-verbose=>2, -exitval => 2);
     exit (1);
 }
@@ -278,6 +281,17 @@ sub cmd_unknown {
     $p4->unknown(@Opt_CmdParams);
 }
 
+sub cmd_change_max {
+    my $p4 = new P4::C4(opt=>$P4Opt);
+    $p4->Init() or die "$0: %Error: Failed to connect to Perforce Server\n";
+    my $max=$p4->changeMax(@Opt_CmdParams);
+    if ($max) {
+	print $max,"\n";
+    } else {
+	die "%Error: Change number not determined.\n";  # Want bad exit status
+    }
+}
+
 sub cmd_help_summary {
     my $self = shift;
     my $longest = 1;
@@ -334,6 +348,11 @@ L<cvs> by having all files writable by default.  C4 adds several commands
 Any command not listed here is passed directly to perforce.
 
 =over 4
+
+=item change-max [files...]
+
+Return the maximum change number present in the current client or passed
+list of files.
 
 =item ci
 
@@ -430,11 +449,13 @@ causing that message, and what may happen on a update.
 Unknown files (?) should be ignored with a .cvsignore file as described in
 the FILES section.
 
-=item unknown [file...]
+=item unknown [-a] [file...]
 
 Prints files that are not known to perforce, and do not have a .cvsignore
 line.  This is similar to the '?' lines printed by "c4 update -n", however
 "c4 unknown" may be used with standard perforce clients.
+
+With -a, mark all unknown files to be added to the depot.
 
 =back
 

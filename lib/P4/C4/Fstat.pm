@@ -1,4 +1,4 @@
-# $Revision: 1.2 $$Date: 2004/09/13 13:09:55 $$Author: ws150726 $
+# $Revision: 1.4 $$Date: 2004/10/15 14:16:42 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -23,7 +23,7 @@ use Carp;
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.031';
+$VERSION = '2.032';
 
 #######################################################################
 #######################################################################
@@ -73,7 +73,7 @@ sub fstatFiles {   # Regular routine called fstat
     $filename = catfile($filename,"...") if -d $filename;
     print "fstat $filename\n" if $P4::C4::Debug;
     my $ui = new P4::C4::Fstat::UI(c4self=>$self);
-    $self->Fstat($ui, "$filename");
+    $self->Fstat($ui, $filename);
 }
 
 ######################################################################

@@ -1,4 +1,4 @@
-# $Revision: 1.2 $$Date: 2004/09/13 13:09:55 $$Author: ws150726 $
+# $Revision: 1.4 $$Date: 2004/10/15 14:16:42 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -22,7 +22,7 @@ use strict;
 require Exporter;
 our @ISA = ('Exporter');
 our @EXPORT = qw( fileNoLinks );
-our $VERSION = '2.031';
+our $VERSION = '2.032';
 
 ######################################################################
 
@@ -48,6 +48,7 @@ sub fileNoLinks {
     # Perforce doesn't allow "cd ~/sim/project" where project is a symlink!
     # Modified example from the web
 	
+    #print "FNLinp: $filename\n";
     $filename = File::Spec->rel2abs($filename);
     my @right = File::Spec->splitdir($filename);
     my @left;
@@ -73,6 +74,9 @@ sub fileNoLinks {
 	    } else {
 		unshift @right, File::Spec->splitdir($link);
 	    }
+	    # Start search over, as we might have more links to resolve
+	    unshift @right, @left;
+	    @left = ();
 	    next;
 	} else {
 	    push @left, $item;
@@ -80,7 +84,7 @@ sub fileNoLinks {
 	}
     }
     my $out = catfile(@left);
-    #print "ABS: $out\n";
+    #print "FNLabs: $out\n";
     return $out;
 }
 
