@@ -6,6 +6,17 @@ The contributors that suggested a given feature is shown in [].
 	
 This uses outline mode in Emacs.  See C-h m [M-x describe-mode].
 
+* Changes in P4::C4 2.030 8/30/2004
+
+***	Detect c4 style clients, and on non-c4 clients allow sync/sumbit.
+	Also allow raw p4 sync or submit with new -p4 flag.
+	This allows c4 to be used as a full replacement for p4, even
+	when the additional management features aren't desired.
+
+****	Support new 2003.02 commands
+
+****	Fix processing of filenames with embeded spaces. [Greg Waters]
+
 * Changes in P4::C4 2.021 1/27/2004
 
 ****	Documentation fixes.
@@ -55,7 +66,7 @@ This uses outline mode in Emacs.  See C-h m [M-x describe-mode].
 
 
 ----------------------------------------------------------------------
-$Id: NEWS,v 1.14 2004/01/27 18:59:22 wsnyder Exp $
+$Id: NEWS,v 1.18 2004/08/30 13:12:38 wsnyder Exp $
 ----------------------------------------------------------------------
 Copyright information:
 

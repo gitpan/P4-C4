@@ -1,4 +1,4 @@
-# $Revision: 1.20 $$Date: 2004/01/27 18:59:22 $$Author: wsnyder $
+# $Revision: 1.26 $$Date: 2004/08/27 16:57:04 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -25,7 +25,7 @@ use Cwd;
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.021';
+$VERSION = '2.030';
 
 #p4 -s -c <client> -d <pwd> -H <host> -p <port> -P <password> -u <user> -C <charset> 
 
@@ -42,6 +42,7 @@ $VERSION = '2.021';
 %Args = (
   'add'		=>'[-c changelist] [-t type] file...',
   'admin'	=>'[-z] cmds...',
+  'annotate'	=>'[-a] [-c] [-q] filerev...',
   'branch'	=>'[-i] [-o] [-d] [-f] branchspec',
   'branches'	=>'',
   'change'	=>'[-i] [-o] [-d] [-f] [-s] [changelist]',
@@ -59,10 +60,10 @@ $VERSION = '2.021';
   'dirs'	=>'[-C] [-D] [-H] [-t type] depotdirectory...',
   'edit'	=>'[-c changelist] [-t type] file...',
   'filelog'	=>'[-i] [-l] [-m maxrev] file...',
-  'files'	=>'filerev...',
+  'files'	=>'[-a] filerev...',
   'fix'		=>'[-d] [-s status] [-c changelist] jobName...',
   'fixes'	=>'[-i] [-j jobname] [-c changelist] [filerevs...]',
-  'flush'	=>'[-n] [filerevs...]',
+  'flush'	=>'[-f] [-n] [filerevs...]',
   'fstat'	=>'[-c changelist] [-C] [-l] [-H] [-P] [-s] [-W] filerev...',
   'group'	=>'[-i] [-o] [-d] groupname',
   'groups'	=>'[user]',
@@ -79,19 +80,19 @@ $VERSION = '2.021';
   'labelsync'	=>'[-a] [-d] [-n] -l labelname [filerevs...]',
   'lock'	=>'[-c changelist] [file ...]',
   'logger'	=>'[-c sequence] [-t countername]',
-  'obliterate'	=>'[-y] filerevs...',
+  'monitor'	=>'[-a] [-l] cmds...',
+  'obliterate'	=>'[-y] [-z] filerevs...',
   'opened'	=>'[-a] [-c changelist] [file...]',
   'passwd'	=>'[-O oldpassword] [-P newpassword] [user]',
   'print'	=>'[-o outfile] [-q] filerev...',
   'protect'	=>'[-o] [-i]',
   'reopen'	=>'[-c changelist] [-t type] file...',
-  'resolve'	=>'[-af] [-am] [-as] [-at] [-ay] [-f] [-n] [-t] [-v] [file...]',
+  'resolve'	=>'[-af] [-am] [-as] [-at] [-ay] [-db] [-dw] [-f] [-n] [-t] [-v] [file...]',
   'resolved'	=>'[file...]',
-  'revert'	=>'[-c changelist] [-a] file...',
+  'revert'	=>'[-c changelist] [-a] [-n] file...',
   'review'	=>'[-c changelist] [-t countername]',
   'reviews'	=>'[-c changelist] [file...]',
   'set'		=>'[-s] [-S svcname] [varvalue]',
-  'sync'	=>'[-f] [-n] [files...]',
   'triggers'	=>'[-i] [-o]',
   'typemap'	=>'[-i] [-o]',
   'unlock'	=>'[-c changelist] [-f] file...',
@@ -100,7 +101,8 @@ $VERSION = '2.021';
   'verify'	=>'[-q] [-u] [-v] file...',
   'where'	=>'[file...]',
   # Flags added      
-  'submit'	=>'[-i] [-f] [-r] [-c changelist] [-s] [files]',  # Added -f
+  'submit'	=>'[-p4] [-i] [-f] [-r] [-c changelist] [-s] [files]',  # Added -f, -p4
+  'sync'	=>'[-p4] [-f] [-n] [files...]',  # Added -p4
   # C4's own
   'client-create' =>'[-i] [-o] [-d] [-f] [-rmdir] [-c4] [-t template] [client]',
   'client-delete' =>'[-d] [-f] [client]',
@@ -344,6 +346,17 @@ sub hashCmd {
     return %hashed;
 }
 
+sub stripOneArg {
+    my $self = shift;
+    my $switch = shift;
+    my @args = @_;
+    my @out;
+    foreach my $par (@args) {
+	push @out, $par unless $par eq $switch;
+    }
+    return @out;
+}
+
 #######################################################################
 
 sub AUTOLOAD {
@@ -382,7 +395,7 @@ P4::Getopt - Get P4 command line options
   ...
 =head1 DESCRIPTION
 
-The C<P4::Getopt> package provides standardized handling of global options
+The L<P4::Getopt> package provides standardized handling of global options
 for the front of P4 commands.
 
 =over 4
@@ -445,18 +458,26 @@ was set to.
 
 Set the client, port, and password based on the options.
 
+=item $self->stripOneArg(-<arg>, <opts>...)
+
+Return the option list, with the specified matching argument removed.
+
 =back
-
-=head1 SEE ALSO
-
-C<P4::C4>, 
 
 =head1 DISTRIBUTION
 
-The latest version is available from CPAN.
+The latest version is available from CPAN and from L<http://www.veripool.com/>.
+
+Copyright 2002-2004 by Wilson Snyder.  This package is free software; you
+can redistribute it and/or modify it under the terms of either the GNU
+Lesser General Public License or the Perl Artistic License.
 
 =head1 AUTHORS
 
 Wilson Snyder <wsnyder@wsnyder.org>
+
+=head1 SEE ALSO
+
+L<P4::C4>
 
 =cut

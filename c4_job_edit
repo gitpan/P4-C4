@@ -1,5 +1,5 @@
-#!/usr/local/bin/perl -w
-#$Id: c4_job_edit,v 1.6 2004/01/27 18:59:22 wsnyder Exp $
+#!/usr/bin/perl -w
+#$Id: c4_job_edit,v 1.10 2004/08/26 15:04:20 ws150726 Exp $
 ######################################################################
 #
 # Copyright 2002-2004 by Wilson Snyder.  This program is free software;
@@ -20,8 +20,6 @@
 require 5.006_001;
 use lib "blib/lib";
 use lib "blib/arch";
-#use lib "/home/wsnyder/SandBox/Tools/wsnyder/perltools/P4-C4/blib/lib";
-#use lib "/home/wsnyder/SandBox/Tools/wsnyder/perltools/P4-C4/blib/arch";
 
 use Getopt::Long;
 use IO::File;
@@ -58,7 +56,7 @@ die "%Error: $0: ".join(' ',@Opt_Params);
 #----------------------------------------------------------------------
 
 sub usage {
-    print '$Id: c4_job_edit,v 1.6 2004/01/27 18:59:22 wsnyder Exp $ ', "\n";
+    print '$Id: c4_job_edit,v 1.10 2004/08/26 15:04:20 ws150726 Exp $ ', "\n";
     pod2usage(-verbose=>2, -exitval => 2);
     exit (1);
 }
@@ -156,15 +154,21 @@ Displays this message and program version and exits.
 
 =back
 
-=head1 SEE ALSO
+=head1 DISTRIBUTION
 
-C<c4>
-C<P4::C4>
-C<p4>
+The latest version is available from CPAN and from L<http://www.veripool.com/>.
+
+Copyright 2002-2004 by Wilson Snyder.  This package is free software; you
+can redistribute it and/or modify it under the terms of either the GNU
+Lesser General Public License or the Perl Artistic License.
 
 =head1 AUTHORS
 
 Wilson Snyder <wsnyder@wsnyder.org>
+
+=head1 SEE ALSO
+
+L<c4>, L<p4>, L<P4::C4>
 
 =cut
 

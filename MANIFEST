@@ -23,6 +23,7 @@ README
 c4
 c4_job_edit
 readme.texi
+t/00_pod.t
 t/10_path.t
 t/20_getopt.opt
 t/20_getopt.t

@@ -1,4 +1,4 @@
-# $Id: Makefile.PL,v 1.8 2004/01/27 18:59:22 wsnyder Exp $
+# $Id: Makefile.PL,v 1.11 2004/03/10 18:29:58 wsnyder Exp $
 # DESCRIPTION: Perl ExtUtils: Type 'perl Makefile.PL' to create a Makefile for this package
 #
 # Copyright 2002-2004 by Wilson Snyder.  This program is free software;
@@ -12,17 +12,23 @@ use Carp;
 sub MY::postamble {
 "
 install-here::
-	make INSTALLMAN1DIR=/usr/local/man/man1 INSTALLMAN3DIR=/usr/local/man/man3 INSTALLBIN=/usr/local/bin INSTALLSCRIPT=/usr/local/bin install
+	make install
 
 README: readme.texi
 	-rm \$@
 	makeinfo \$< --output \$@ --no-headers --no-validate
 
 ## Maintainer use:
+preexist:
+	test ! -r \$(HOME)/src/kits/\$(DISTVNAME).tar.gz
+
 tag:
 	cvs tag -F \$(DISTNAME)_\$(VERSION_SYM) .
 
-maintainer-dist: dist tag
+maintainer-diff:
+	cvs diff -r \$(DISTNAME)_\$(VERSION_SYM) 
+
+maintainer-dist: preexist dist tag
 	cp \$(DISTVNAME).tar.gz \$(HOME)/src/kits
 	mv \$(DISTVNAME).tar.gz \$(HOME)/backpack
 

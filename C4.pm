@@ -1,5 +1,5 @@
 # VHier.pm -- Test running utilities
-# $Revision: 1.17 $$Date: 2004/01/27 18:59:22 $$Author: wsnyder $
+# $Revision: 1.20 $$Date: 2004/08/26 15:04:20 $$Author: ws150726 $
 ######################################################################
 #
 # Copyright 2002-2004 by Wilson Snyder.  This program is free software;
@@ -44,7 +44,7 @@ our @ISA = qw (P4::Client);
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.021';
+$VERSION = '2.030';
 
 ######################################################################
 #### Creators
@@ -101,30 +101,38 @@ file. Used by P4::C4::Files and other functions.
 
 =back
 
-=head1 SEE ALSO
+=head1 DISTRIBUTION
 
-C<c4>, C<p4>
+The latest version is available from CPAN and from L<http://www.veripool.com/>.
 
-C<P4::Client>
-C<P4::Getopt>
-C<P4::C4::UI>
-
-C<P4::C4::Cache>
-C<P4::C4::Client>
-C<P4::C4::Diff>
-C<P4::C4::File>
-C<P4::C4::Fstat>
-C<P4::C4::Ignore>
-C<P4::C4::Info>
-C<P4::C4::Path>
-C<P4::C4::Submit>
-C<P4::C4::Sync>
-C<P4::C4::Update>
-C<P4::C4::User>
+Copyright 2002-2004 by Wilson Snyder.  This package is free software; you
+can redistribute it and/or modify it under the terms of either the GNU
+Lesser General Public License or the Perl Artistic License.
 
 =head1 AUTHORS
 
 Wilson Snyder <wsnyder@wsnyder.org>
+
+=head1 SEE ALSO
+
+L<c4>, L<p4>, L<p4_job_edit>
+
+L<P4::Client>,
+L<P4::Getopt>,
+
+L<P4::C4::UI>,
+L<P4::C4::Cache>,
+L<P4::C4::Client>,
+L<P4::C4::Diff>,
+L<P4::C4::File>,
+L<P4::C4::Fstat>,
+L<P4::C4::Ignore>,
+L<P4::C4::Info>,
+L<P4::C4::Path>,
+L<P4::C4::Submit>,
+L<P4::C4::Sync>,
+L<P4::C4::Update>,
+L<P4::C4::User>
 
 =cut
 ######################################################################

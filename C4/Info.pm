@@ -1,4 +1,4 @@
-# $Revision: 1.10 $$Date: 2004/01/27 18:59:22 $$Author: wsnyder $
+# $Revision: 1.13 $$Date: 2004/08/26 15:04:20 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -23,7 +23,7 @@ use Carp;
 ######################################################################
 #### Configuration Section
 
-our $VERSION = '2.021';
+our $VERSION = '2.030';
 
 #######################################################################
 #######################################################################
@@ -122,16 +122,20 @@ as the parent object exists.
 
 =back
 
-=head1 SEE ALSO
-
-C<P4::Client>, C<P4::C4>, 
-
 =head1 DISTRIBUTION
 
-The latest version is available from CPAN.
+The latest version is available from CPAN and from L<http://www.veripool.com/>.
+
+Copyright 2002-2004 by Wilson Snyder.  This package is free software; you
+can redistribute it and/or modify it under the terms of either the GNU
+Lesser General Public License or the Perl Artistic License.
 
 =head1 AUTHORS
 
 Wilson Snyder <wsnyder@wsnyder.org>
+
+=head1 SEE ALSO
+
+L<P4::Client>, L<P4::C4>
 
 =cut

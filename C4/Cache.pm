@@ -1,4 +1,4 @@
-# $Revision: 1.7 $$Date: 2004/01/27 18:59:22 $$Author: wsnyder $
+# $Revision: 1.11 $$Date: 2004/08/26 15:04:20 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -15,7 +15,7 @@
 
 package P4::C4::Cache;
 
-$VERSION = '2.021';
+$VERSION = '2.030';
 
 ######################################################################
 ######################################################################
@@ -29,18 +29,22 @@ use strict;
 
 our $CurrentSelf;
 
+sub cacheFilename {
+    my $self = shift;
+    return $self->clientRoot."/.c4cache";
+}
+
 sub rmCache {
     my $self = shift;
     # Remove the cache
-    my $filename = $self->clientRoot."/.c4cache";
-    unlink $filename;
+    unlink $self->cacheFilename;
 }
 
 sub readCache {
     my $self = shift;
     # Read the .c4cache into _files
 
-    my $filename = $self->clientRoot."/.c4cache";
+    my $filename = $self->cacheFilename;
     if (-r $filename) {
 	print "readCache($filename)\n" if $P4::C4::Debug;
 	$CurrentSelf = $self;  # As self isn't known by the "do"
@@ -55,7 +59,7 @@ sub writeCache {
     my $self = shift;
     # Write the .c4cache
 
-    my $filename = $self->clientRoot."/.c4cache";
+    my $filename = $self->cacheFilename;
     my $fh = IO::File->new($filename,"w") or return;  # It's just a cache, after all
     print "writeCache($filename)\n" if $P4::C4::Debug;
     foreach my $file (sort (keys %{$self->{_files}})) {
@@ -97,16 +101,20 @@ P4::C4::Cache - Caching of file information for Ct
 
 This module is for managing file caches for internal P4::C4 use.
 
-=head1 SEE ALSO
-
-C<P4::C4>, 
-
 =head1 DISTRIBUTION
 
-The latest version is available from CPAN.
+The latest version is available from CPAN and from L<http://www.veripool.com/>.
+
+Copyright 2002-2004 by Wilson Snyder.  This package is free software; you
+can redistribute it and/or modify it under the terms of either the GNU
+Lesser General Public License or the Perl Artistic License.
 
 =head1 AUTHORS
 
 Wilson Snyder <wsnyder@wsnyder.org>
+
+=head1 SEE ALSO
+
+L<P4::C4>
 
 =cut

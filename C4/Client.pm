@@ -1,4 +1,4 @@
-# $Revision: 1.17 $$Date: 2004/01/27 18:59:22 $$Author: wsnyder $
+# $Revision: 1.21 $$Date: 2004/08/26 15:04:20 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -27,7 +27,7 @@ use P4::C4::Info;
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.021';
+$VERSION = '2.030';
 
 #######################################################################
 #######################################################################
@@ -174,10 +174,9 @@ sub createClient {
     $self->SetClient($opts{client}[0]) if $opts{client}[0];
 
     # Call perforce to make the client
-    my @p4args;
-    foreach my $opt (@args) {
-	push @p4args, $opt if $opt ne "-c4" && $opt ne "-rmdir";
-    }
+    my @p4args = @args;
+    @p4args = P4::Getopt->stripOneArg('-c4',@p4args);
+    @p4args = P4::Getopt->stripOneArg('-rmdir',@p4args);
 
     my $ui = new P4::C4::Client::CreateUI ('c4' => $opts{-c4},
 					   'rmdir' => $opts{-rmdir},);
@@ -292,8 +291,12 @@ sub clientView {
 sub clientC4Managed {
     my $self = shift;
     if (!defined $self->{c4_managed}) {
-	my $ui = $self->clientDetails(@_);
-	$self->{c4_managed} = $ui->{c4_managed} ? 1:0; 
+	if (-e $self->cacheFilename) {
+	    $self->{c4_managed} = 1;
+	} else {
+	    my $ui = $self->clientDetails(@_);
+	    $self->{c4_managed} = $ui->{c4_managed} ? 1:0;
+	}
     }
     return $self->{c4_managed}; 
 }
@@ -337,16 +340,20 @@ Return an array with the view of the current client.
 
 =back
 
-=head1 SEE ALSO
-
-C<P4::Client>, C<P4::C4>, 
-
 =head1 DISTRIBUTION
 
-The latest version is available from CPAN.
+The latest version is available from CPAN and from L<http://www.veripool.com/>.
+
+Copyright 2002-2004 by Wilson Snyder.  This package is free software; you
+can redistribute it and/or modify it under the terms of either the GNU
+Lesser General Public License or the Perl Artistic License.
 
 =head1 AUTHORS
 
 Wilson Snyder <wsnyder@wsnyder.org>
+
+=head1 SEE ALSO
+
+L<P4::Client>, L<P4::C4>, 
 
 =cut

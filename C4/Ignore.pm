@@ -1,4 +1,4 @@
-# $Revision: 1.10 $$Date: 2004/01/27 18:59:22 $$Author: wsnyder $
+# $Revision: 1.14 $$Date: 2004/08/26 15:04:20 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -25,7 +25,7 @@ use Cwd qw(getcwd);
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.021';
+$VERSION = '2.030';
 
 #######################################################################
 #######################################################################
@@ -163,7 +163,7 @@ P4::C4::Ignore - Read a cvs ignore file
 
 =head1 DESCRIPTION
 
-The C<P4::C4::Ignore> package reads .cvsignore files and provides matching
+The L<P4::C4::Ignore> package reads .cvsignore files and provides matching
 functions.
 
 =head1 IGNORE FILES
@@ -203,13 +203,20 @@ will have to be created to clear the hash.
 
 Returns true if the file is being ignored.
 
+=back
+
 =head1 SEE ALSO
 
-C<P4::C4>, 
+L<P4::C4>
 
 =head1 DISTRIBUTION
 
 The latest version is available from CPAN.
+The latest version is available from CPAN and from L<http://www.veripool.com/>.
+
+Copyright 2002-2004 by Wilson Snyder.  This package is free software; you
+can redistribute it and/or modify it under the terms of either the GNU
+Lesser General Public License or the Perl Artistic License.
 
 =head1 AUTHORS
 

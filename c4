@@ -1,5 +1,5 @@
-#!/usr/local/bin/perl -w
-#$Id: c4,v 1.25 2004/01/27 18:59:22 wsnyder Exp $
+#!/usr/bin/perl -w
+#$Id: c4,v 1.32 2004/08/26 15:04:20 ws150726 Exp $
 ######################################################################
 #
 # Copyright 2002-2004 by Wilson Snyder.  This program is free software;
@@ -20,8 +20,6 @@
 require 5.006_001;
 use lib "blib/lib";
 use lib "blib/arch";
-use lib "/home/wsnyder/SandBox/Tools/wsnyder/perltools/P4-C4/blib/lib";
-use lib "/home/wsnyder/SandBox/Tools/wsnyder/perltools/P4-C4/blib/arch";
 
 use Getopt::Long;
 use IO::File;
@@ -132,21 +130,30 @@ if ($Opt_Cmd eq "client-create") {
 } elsif ($Opt_Cmd eq "get") {
     die "%Error: Use 'c4 update' instead of 'c4 get'.\n";
 } elsif ($Opt_Cmd eq "update") {
-    cmd_update();
+    if (is_c4_managed()) {
+	cmd_update();
+    } else {
+	die "%Error: Client is not under c4 management.\n";
+    }
 } elsif ($Opt_Cmd eq "unknown") {
     cmd_unknown();
 } elsif ($Opt_Cmd eq "submit") {
-    #if (is_c4_managed()) {
+    my %opts = P4::Getopt->hashCmd($Opt_Cmd, @Opt_CmdParams);
+    if (!$opts{-p4} && is_c4_managed()) {
 	cmd_submit();
-    #} else {
-    #	cmd_p4();
-    #}
+    } else {
+	@Opt_CmdParams = P4::Getopt->stripOneArg('-p4',@Opt_CmdParams);
+    	cmd_p4();
+    }
 } elsif ($Opt_Cmd eq "sync") {
-    #if (is_c4_managed()) {
-	die "%Error: Use 'c4 update' instead of 'c4 sync'.\n";
-    #} else {
-    #	cmd_p4();
-    #}
+    my %opts = P4::Getopt->hashCmd($Opt_Cmd, @Opt_CmdParams);
+    if (!$opts{-p4} && is_c4_managed()) {
+	die "%Error: Client is under c4 management, use 'c4 update' instead of 'c4 sync'.\n";
+	# Or, use -p4 switch
+    } else {
+	@Opt_CmdParams = P4::Getopt->stripOneArg('-p4',@Opt_CmdParams);
+    	cmd_p4();
+    }
 } elsif ($Opt_Cmd eq "help") {
     if ($#Opt_CmdParams < 0) {
 	print "C4 Wrapper commands:\n";
@@ -163,7 +170,7 @@ if ($Opt_Cmd eq "client-create") {
 #----------------------------------------------------------------------
 
 sub usage {
-    print '$Id: c4,v 1.25 2004/01/27 18:59:22 wsnyder Exp $ ', "\n";
+    print '$Id: c4,v 1.32 2004/08/26 15:04:20 ws150726 Exp $ ', "\n";
     pod2usage(-verbose=>2, -exitval => 2);
     exit (1);
 }
@@ -196,24 +203,23 @@ sub parameter {
 # Commands invoked by the user
 
 sub is_c4_managed {
-    my $p4 = new P4::C4;
-    $P4Opt->setClientOpt($p4);
+    my $p4 = new P4::C4(opt=>$P4Opt);
     $p4->Init() or die "$0: %Error: Failed to connect to Perforce Server\n";
     return $p4->clientC4Managed();
 }
 
 sub cmd_p4 {
     # Call c4 using all the default parameters from the command line
-    my $cmd = "p4 ";
-    $cmd .= join(' ', $P4Opt->get_parameters);
-    $cmd .= ' '.$Opt_Cmd;
-    $cmd .= " -n" if ($P4Opt->noop);	# convert 'c4 -n update' to 'c4 update -n'
-    $cmd .= ' '.join(' ', @Opt_CmdParams);
+    my @cmd = ("p4");
+    push @cmd, $P4Opt->get_parameters;
+    push @cmd, $Opt_Cmd;
+    push @cmd, "-n" if ($P4Opt->noop);	# convert 'c4 -n update' to 'c4 update -n'
+    push @cmd, @Opt_CmdParams;
 
     # Run
-    print "\t$cmd\n" if $Debug;
+    print "\t",join(' ',@cmd),"\n" if $Debug;
     local $! = undef;
-    system $cmd;
+    system @cmd;
     my $status = $?; my $msgx = $!;
     if (!$Debug) {
 	($status == 0) or exit($status);  # Don't print a message, p4 did
@@ -224,8 +230,7 @@ sub cmd_p4 {
 sub cmd_client_create {
     print "cmd_client_create ",join(' ',@Opt_CmdParams),"\n"  if $Debug;
 
-    my $p4 = new P4::C4;
-    $P4Opt->setClientOpt($p4);
+    my $p4 = new P4::C4(opt=>$P4Opt);
     $p4->Init() or die "$0: %Error: Failed to connect to Perforce Server\n";
     $p4->createClient('-c4', '-rmdir', @Opt_CmdParams);
 }
@@ -233,8 +238,7 @@ sub cmd_client_create {
 sub cmd_client_delete {
     print "cmd_client_delete ",join(' ',@Opt_CmdParams),"\n"  if $Debug;
 
-    my $p4 = new P4::C4;
-    $P4Opt->setClientOpt($p4);
+    my $p4 = new P4::C4(opt=>$P4Opt);
     $p4->Init() or die "$0: %Error: Failed to connect to Perforce Server\n";
     $p4->clientDelete(@Opt_CmdParams);
 }
@@ -253,8 +257,7 @@ sub cmd_submit {
     my $p4 = new P4::C4(opt=>$P4Opt);
     $p4->Init() or die "$0: %Error: Failed to connect to Perforce Server\n";
     $p4->submitCheckC4(@Opt_CmdParams);
-    my @pars = @Opt_CmdParams;  @Opt_CmdParams = ();
-    foreach my $par (@pars) { push @Opt_CmdParams,$par if $par ne "-f"; }
+    @Opt_CmdParams = P4::Getopt->stripOneArg('-f',@Opt_CmdParams);
     cmd_p4();
 }
 
@@ -284,7 +287,7 @@ c4 - CVSish wrapper for perforce p4 program
     c4 [-n]   update
     c4        unknown
 
-    c4 I<any p4 command>
+    c4 <any p4 command>
        i.e.:  c4 add <file>
               c4 delete <file>
               c4 diff <file>    		     
@@ -297,10 +300,12 @@ When passed a filename on any c4 command, c4 makes the filename absolute,
 with all symlinks reduced, and chdir's if possible to the first such
 filename.  If the argument is a directory, a /... is appended.  This makes
 it a lot more likely that perforce commands will work when issued from
-outside a client area.  (For example: c4 add /my/area/boo/blaz.)
+outside a client area.  (For example: c4 add /my/area/boo/blaz.)  For this
+to work best, your p4 ClientRoot should point to the area that is
+physically on the disk, with all symlinks resolved.
 
-When a client is created in a special way, C4 makes C<p4> seem more like
-C<cvs> by having all files writable by default.  C4 adds several commands
+When a client is created in a special way, C4 makes L<p4> seem more like
+L<cvs> by having all files writable by default.  C4 adds several commands
 (update/client_create) to support this, see the COMMANDS section.
 
 =head1 COMMANDS
@@ -346,12 +351,25 @@ C<rm .p4config> to cleanup the local directory.
 
 Alias for C<c4 delete>.
 
-=item submit [-f] [normal p4 args]
+=item submit [-p4] [-f] [normal p4 args]
 
-This performs a p4 submit.  In addition, it prints an error if the area is
-not up to date before submitting.  -f overrides this check.  Use -f
-carefully as edited files may not yet be opened for editing as they would be
-if the update was done.
+This performs a p4 submit.  
+
+Under c4 style management, it prints an error if the area is not up to date
+before submitting.  -f overrides this check.  Use -f carefully as edited
+files may not yet be opened for editing as they would be if the update was
+done.
+
+Under traditional management, or with the -p4 flag, calls the normal p4
+submit command.
+
+=item sync [-p4] [normal p4 args]
+
+This performs a p4 sync.
+
+Under c4 style management, C<c4 update> should be used instead.  Under
+traditional management, or with the -p4 flag, calls the normal C<p4 sync>
+command.
 
 =item update [-n] [file...]
 
@@ -452,16 +470,23 @@ As with CVS, comments are NOT supported!
 
 =back
 
-=head1 SEE ALSO
+=head1 DISTRIBUTION
 
-C<c4>
-C<c4_job_edit>
-C<P4::C4>
-C<p4>
+The latest version is available from CPAN and from L<http://www.veripool.com/>.
+
+Copyright 2002-2004 by Wilson Snyder.  This package is free software; you
+can redistribute it and/or modify it under the terms of either the GNU
+Lesser General Public License or the Perl Artistic License.
 
 =head1 AUTHORS
 
 Wilson Snyder <wsnyder@wsnyder.org>
+
+=head1 SEE ALSO
+
+L<p4>,
+L<c4_job_edit>,
+L<P4::C4>
 
 =cut
 
