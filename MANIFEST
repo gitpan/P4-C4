@@ -11,6 +11,7 @@ C4/Path.pm
 C4/Submit.pm
 C4/Sync.pm
 C4/UI.pm
+C4/Unknown.pm
 C4/Update.pm
 C4/User.pm
 COPYING

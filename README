@@ -3,11 +3,12 @@
 Copyright
 =========
 
-   This package is Copyright 2002 by Wilson Snyder
+   This package is Copyright 2002-2004 by Wilson Snyder
 <wsnyder@wsnyder.org>.
 
    You may distribute under the terms of either the GNU General Public
-License or the Artistic License, as specified in the Perl README file.
+License or the Perl Artistic License, as specified in the Perl README
+file.
 
    This code is provided with no warranty of any kind, and is used
 entirely at your own risk.
@@ -15,7 +16,7 @@ entirely at your own risk.
 Description
 ===========
 
-   This package wrapps the Perforce client in a CVS like wrapper.
+   This package wraps the Perforce client in a CVS like wrapper.
 
 Obtaining Distribution
 ======================

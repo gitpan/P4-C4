@@ -1,22 +1,16 @@
 # VHier.pm -- Test running utilities
-# $Revision: 1.14 $$Date: 2003/07/03 15:26:24 $$Author: wsnyder $
+# $Revision: 1.17 $$Date: 2004/01/27 18:59:22 $$Author: wsnyder $
 ######################################################################
 #
-# This program is Copyright 2002 by Wilson Snyder.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of either the GNU General Public License or the
-# Perl Artistic License.
+# Copyright 2002-2004 by Wilson Snyder.  This program is free software;
+# you can redistribute it and/or modify it under the terms of either the GNU
+# General Public License or the Perl Artistic License.
 # 
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 # 
-# If you do not have a copy of the GNU General Public License write to
-# the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, 
-# MA 02139, USA.
-#                                                                           
 ######################################################################
 
 package P4::C4;
@@ -50,7 +44,7 @@ our @ISA = qw (P4::Client);
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.020';
+$VERSION = '2.021';
 
 ######################################################################
 #### Creators
@@ -93,7 +87,7 @@ P4::C4 - CVS Like wrapper for Perforce
 
 =head1 DESCRIPTION
 
-P4::C4 is a derrived class of C4::Client.  The various P4::C4::... classes
+P4::C4 is a derived class of C4::Client.  The various P4::C4::... classes
 add member functions to this class to perform various functions.
 
 =head1 FUNCTIONS

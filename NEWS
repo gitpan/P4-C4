@@ -6,6 +6,10 @@ The contributors that suggested a given feature is shown in [].
 	
 This uses outline mode in Emacs.  See C-h m [M-x describe-mode].
 
+* Changes in P4::C4 2.021 1/27/2004
+
+****	Documentation fixes.
+
 * Changes in P4::C4 2.020 8/6/2003
 
 **	Added "c4 unknown" command.
@@ -51,11 +55,13 @@ This uses outline mode in Emacs.  See C-h m [M-x describe-mode].
 
 
 ----------------------------------------------------------------------
-$Id: NEWS,v 1.12 2003/08/06 15:29:58 wsnyder Exp $
+$Id: NEWS,v 1.14 2004/01/27 18:59:22 wsnyder Exp $
 ----------------------------------------------------------------------
 Copyright information:
 
-Copyright (C) 2002 Wilson Snyder
+   Copyright 2002-2004 by Wilson Snyder.  This program is free software;
+   you can redistribute it and/or modify it under the terms of either the GNU
+   General Public License or the Perl Artistic License.
 
    See the README file included with this file for licencing information.
 

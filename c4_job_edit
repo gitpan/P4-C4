@@ -1,12 +1,10 @@
 #!/usr/local/bin/perl -w
-#$Id: c4_job_edit,v 1.4 2003/06/18 15:38:30 wsnyder Exp $
+#$Id: c4_job_edit,v 1.6 2004/01/27 18:59:22 wsnyder Exp $
 ######################################################################
 #
-# This program is Copyright 2002 by Wilson Snyder.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of either the GNU General Public License or the
-# Perl Artistic License.
+# Copyright 2002-2004 by Wilson Snyder.  This program is free software;
+# you can redistribute it and/or modify it under the terms of either the GNU
+# General Public License or the Perl Artistic License.
 # 
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -60,7 +58,7 @@ die "%Error: $0: ".join(' ',@Opt_Params);
 #----------------------------------------------------------------------
 
 sub usage {
-    print '$Id: c4_job_edit,v 1.4 2003/06/18 15:38:30 wsnyder Exp $ ', "\n";
+    print '$Id: c4_job_edit,v 1.6 2004/01/27 18:59:22 wsnyder Exp $ ', "\n";
     pod2usage(-verbose=>2, -exitval => 2);
     exit (1);
 }
