@@ -6,6 +6,25 @@ The contributors that suggested a given feature is shown in [].
 	
 This uses outline mode in Emacs.  See C-h m [M-x describe-mode].
 
+* Changes in P4::C4 2.040 11/9/2004
+
+***	Added 'c4 update/unknown -pi' to print those files which are
+	unknown, but suppressed with a .cvsignore file.  [David Rees]
+
+***	Added 'c4 update -rl' to remove lost files. [David Rees]
+	If you use the parameter then all lost files are "p4 deleted" in
+	the client, and thus combination of -a and -rl essentially says
+	"make perforce like my local".
+
+***	Added 'c4 update -a' to add unknown files.  [David Rees]
+
+***	Added support for CVSIGNORE, "~/.cvsignore", and !. [David Rees]
+	These add additional compatibility with CVS's ignore rules.
+
+****	Added "due to {filename}" to "Must update again." [David Rees]
+
+****	Fixed performance problem when updating subdirs. [David Rees]
+
 * Changes in P4::C4 2.032 10/15/2004
 
 ***	Added 'c4 change-max'.  [Rajesh Vaidheeswarran]
@@ -78,7 +97,7 @@ This uses outline mode in Emacs.  See C-h m [M-x describe-mode].
 
 
 ----------------------------------------------------------------------
-$Id: NEWS,v 1.22 2004/10/15 14:15:32 ws150726 Exp $
+$Id: NEWS,v 1.25 2004/11/09 13:35:16 ws150726 Exp $
 ----------------------------------------------------------------------
 Copyright information:
 

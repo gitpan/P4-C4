@@ -1,4 +1,4 @@
-# $Revision: 1.3 $$Date: 2004/10/15 14:16:42 $$Author: ws150726 $
+# $Revision: 1.6 $$Date: 2004/11/09 13:42:38 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -27,7 +27,7 @@ use Cwd qw(getcwd);
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.032';
+our $VERSION = '2.040';
 
 #######################################################################
 #######################################################################
@@ -37,20 +37,30 @@ sub new {
     @_ >= 1 or croak 'usage: P4::C4::Ignore->new ({options})';
     my $class = shift || __PACKAGE__;		# Class (Getopt Element)
     my $self = {filename=>'.cvsignore',
-		_files=>{},		# Cache by filename of parsed ignores
+		_files=>{},		# Cache by filename of raw text ignores
+		_regexp=>{},		# Cache by filename of parsed ignores
 		@_,
 	    };
     bless $self, $class;
     $self->_addIgnore ('GLOBAL',(
-				 'tags',    'TAGS',
-				 '.make.state',     '.nse_depinfo',
 				 '*~',	  '#*',    '.#*',    ',*',	   '_$*',   '*$',
 				 '*.old', '*.bak', '*.BAK',  '*.orig', '*.rej', '.del-*',
 				 '*.a',  '*.olb', '*.o',    '*.obj',  '*.so',  '*.exe',
 				 '*.Z',  '*.elc', '*.ln',
+				 'tags',	'TAGS',
+				 '.make.state',	'.nse_depinfo',
 				 'core',
-				 #
-				 '.c4cache', '.p4config',));
+				 # Not in CVS
+				 '.dependency-info',
+				 # Our own temp files
+				 '.c4cache',	'.p4config',));
+    
+    # Read user's .cvsignore into global list
+    $self->_readIgnore("GLOBAL",catfile($ENV{HOME},".cvsignore")) if defined $ENV{HOME};
+
+    # Read CVSIGNORE environment
+    $self->_addIgnore ("GLOBAL", (split /\s+/, $ENV{CVSIGNORE})) if defined $ENV{CVSIGNORE};
+
     return $self;
 }
 
@@ -62,11 +72,10 @@ sub isIgnored {
     my $filename = shift;
 
     $filename = File::Spec->rel2abs($filename);
-    return 1 if _checkOneDir($self,'GLOBAL',$filename);
     my @dirlist = File::Spec->splitdir($filename);
     while ($#dirlist > 0) {
-	return 1 if _checkOneDir($self,catdir(@dirlist),$filename);
 	$filename = pop @dirlist;
+	return 1 if _checkOneDir($self,catdir(@dirlist),$filename);
     }
     return 0;
 }
@@ -79,13 +88,14 @@ sub _checkOneDir {
     my $dirname = shift;
     my $filename = shift;
 
-    if (!$self->{_files}{$dirname}) {
-	$self->_readIgnore($dirname);
+    if (!$self->{_regexp}{$dirname}) {
+	$self->_readIgnore($dirname, catfile($dirname,$self->{filename}));
     }
 
     my $basename = (File::Spec->splitpath($filename))[2];
     #print "CK1 $dirname $basename\n";
-    foreach my $re (@{$self->{_files}{$dirname}}) {
+    foreach my $re (@{$self->{_regexp}{$dirname}}) {
+	#print "CK1b $dirname $basename $re\n";
 	return 1 if ($basename =~ /$re/);
     }
     return 0;
@@ -97,10 +107,11 @@ sub _checkOneDir {
 sub _readIgnore {
     my $self = shift;
     my $dirname = shift;
+    my $filename = shift;
 
-    return if $self->{_files}{$dirname};	# Cached
-    my $fh = IO::File->new(catfile($dirname,$self->{filename}),"r");
-    $self->{_files}{$dirname} = [];
+    return if $self->{_files}{$dirname} && $dirname ne 'GLOBAL';	# Cached
+    my $fh = IO::File->new($filename,"r");
+    $self->_addIgnore ($dirname, @{$self->{_files}{GLOBAL}}) if $dirname ne 'GLOBAL';
     if ($fh) {
 	local $/; undef $/; my $wholefile = <$fh>;
 	$self->_addIgnore ($dirname, (split /\s+/, $wholefile));
@@ -111,13 +122,22 @@ sub _addIgnore {
     my $self = shift;
     my $dirname = shift;
     foreach my $re (@_) {
-	my $regexp = quotemeta $re;
-	$regexp =~ s%\\\*%.*%g;
-	$regexp =~ s%\\\?%.%g;
-	$regexp = "^".$regexp."\$";
-	print "  Ignore in $dirname: $regexp\n" if $Debug;
-	push @{$self->{_files}{$dirname}}, qr/$regexp/;
+	print "  Ignore in $dirname: $re\n" if $Debug;
+	if ($re eq "!") {
+	    $self->{_files}{$dirname} = [];
+	} else {
+	    push @{$self->{_files}{$dirname}}, $re;
+	}
     }
+
+    # Convert patterns to regexp, for faster parsing
+    my @relist = map { my $regexp = quotemeta $_;
+		       $regexp =~ s%\\\*%.*%g;
+		       $regexp =~ s%\\\?%.%g;
+		       $regexp = "^".$regexp."\$";
+		       qr/$regexp/;
+		   } @{$self->{_files}{$dirname}};
+    $self->{_regexp}{$dirname} = \@relist;
 }
 
 ######################################################################
@@ -171,20 +191,28 @@ functions.
 
 =head1 IGNORE FILES
 
-Ignore files are mostly compatible with CVS.  The list of ignores is
+Ignore files are mostly compatible with CVS.  The global list of ignores is
 initialized with:
 
-              tags    TAGS
-              .make.state     .nse_depinfo
-              *~      #*      .#*     ,*      _$*     *$
-              *.old   *.bak   *.BAK   *.orig  *.rej   .del-*
-              *.a     *.olb   *.o     *.obj   *.so    *.exe
-              *.Z     *.elc   *.ln
-              core
+    *~      #*      .#*     ,*      _$*     *$
+    *.old   *.bak   *.BAK   *.orig  *.rej   .del-*
+    *.a     *.olb   *.o     *.obj   *.so    *.exe
+    *.Z     *.elc   *.ln
+    .c4cache     .p4config
+    .make.state  .nse_depinfo  .dependency-info
+    tags         TAGS
+    core
 
-The patterns found in `.cvsignore' are only valid for the directory that
-contains them, not for any sub-directories.  A single exclamation mark
-(`!')  clears the ignore list.
+Patterns in the home directory file ~/.cvsignore, or the CVSIGNORE
+environment variable are appended to this list.
+
+Each directory may have a local '.cvsignore' file.  The patterns found in
+local `.cvsignore' are only valid for the directory that contains them, not
+for any sub-directories.  
+
+In any of the places listed above, a single exclamation mark (`!')  clears
+the ignore list.  This can be used if you want to store any file which
+normally is ignored.
 
 The wildcards * and ? are honored, no other wildcards are currently
 supported.

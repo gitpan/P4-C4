@@ -1,4 +1,4 @@
-# $Revision: 1.3 $$Date: 2004/10/15 14:16:42 $$Author: ws150726 $
+# $Revision: 1.5 $$Date: 2004/11/09 13:42:38 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -16,7 +16,7 @@
 package P4::C4::Update;
 use strict;
 
-our $VERSION = '2.032';
+our $VERSION = '2.040';
 
 ######################################################################
 ######################################################################
@@ -40,10 +40,19 @@ sub update {
     # Not yet:
     #$self->clientC4Managed or die "%Error: Client was not created by c4 client-create\n";
 
+    my $add;
+    my $delete;
+    my $printIgnored;
     my @files;
     foreach my $param (@params) {
 	if ($param eq "-n") {
 	    $self->{opt}->noop(1);
+	} elsif ($param eq "-rl") {
+	    $delete = 1;
+	} elsif  ($param eq '-a') {
+	    $add = 1;
+	} elsif ($param eq "-pi") {
+	    $printIgnored = 1;
 	} elsif ($param =~ /^-/) {
 	    die "%Error: Unknown update parameter: $param\n";
 	} else {
@@ -89,7 +98,14 @@ sub update {
 	    # Exists, but user doesn't have it
 	    if ($fref->{haveRev}) {
 		$fref->{status} = 'l-lost';
-		if (($fref->{action}||'') eq 'edit') {
+		# If delete then delete the file from perforce
+		if ($delete) {
+			$fref->{status} = 'R-rlop';
+			if (!$self->{opt}->noop) {
+			    my $ui = new P4::C4::UI();
+			    $self->Delete($ui, $fref->{filename});
+			}
+		} elsif (($fref->{action}||'') eq 'edit') {
 		    $self->_updateAction($fref,"revert",$fref->{filename});
 		} else {
 		    $self->_updateAction($fref,"sync","-f",$fref->{filename});
@@ -154,7 +170,21 @@ sub update {
     foreach my $fref (sort {$a->{filename} cmp $b->{filename}}
 		      (values %{$self->{_files}})) {
 	my $stat = $fref->{status};  # May be defined or not
-	$stat ||= '?-    ' if ($fref->{unknown});
+	if ($fref->{unknown}) {
+		$stat ||= '?-    ';
+	    if ($add) {
+		$fref->{status} = 'A-aopt';
+		$stat = 'A-aopt';
+		if (!$self->{opt}->noop) {
+		    my $ui = new P4::C4::UI();
+		    $self->Add($ui, $fref->{filename});
+		}
+	    }
+	}
+
+	if ($printIgnored) {
+	    $stat ||= 'i-    ' if ($fref->{ignore});
+	}
 	if ($stat) {
 	    $stat =~ s/-.*$// if !$P4::C4::Debug;
 	    print $stat." ".$fref->{filename}."\n";

@@ -1,4 +1,4 @@
-# $Revision: 1.3 $$Date: 2004/10/15 14:16:42 $$Author: ws150726 $
+# $Revision: 1.4 $$Date: 2004/11/09 13:42:38 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -16,10 +16,9 @@
 package P4::C4::UI;
 use P4::UI;
 use strict;
-use vars qw($VERSION);
 our @ISA = qw( P4::UI );
 
-$VERSION = '2.032';
+our $VERSION = '2.040';
 
 sub new {
     my $class = shift;

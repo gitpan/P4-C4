@@ -1,4 +1,4 @@
-# $Revision: 1.6 $$Date: 2004/10/15 14:16:42 $$Author: ws150726 $
+# $Revision: 1.8 $$Date: 2004/11/09 13:42:38 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -17,7 +17,7 @@ package P4::Getopt;
 require 5.006_001;
 
 use strict;
-use vars qw($VERSION $AUTOLOAD $Debug %Args);
+use vars qw($AUTOLOAD $Debug %Args);
 use Carp;
 use IO::File;
 use Cwd;
@@ -25,7 +25,7 @@ use Cwd;
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.032';
+our $VERSION = '2.040';
 
 #p4 -s -c <client> -d <pwd> -H <host> -p <port> -P <password> -u <user> -C <charset> 
 
@@ -108,8 +108,8 @@ $VERSION = '2.032';
   'client-create' =>'[-i] [-o] [-d] [-f] [-rmdir] [-c4] [-t template] [client]',
   'client-delete' =>'[-d] [-f] [client]',
   'help-summary'  =>'',
-  'unknown'	  =>'[-a] [files...]',
-  'update'	  =>'[-n] [-f] [files...]',
+  'unknown'	  =>'[-a] [-pi] [files...]',
+  'update'	  =>'[-n] [-f] [-a] [-pi] [-rl] [files...]',
 );
 
 #######################################################################

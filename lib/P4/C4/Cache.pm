@@ -1,4 +1,4 @@
-# $Revision: 1.3 $$Date: 2004/10/15 14:16:42 $$Author: ws150726 $
+# $Revision: 1.5 $$Date: 2004/11/09 13:42:38 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -14,8 +14,9 @@
 ######################################################################
 
 package P4::C4::Cache;
+use strict;
 
-$VERSION = '2.032';
+our $VERSION = '2.040';
 
 ######################################################################
 ######################################################################
@@ -67,7 +68,12 @@ sub writeCache {
 	my $fref = $self->{_files}{$file};
 	(my $filequote = $file) =~ s/\'/\\\'/g;
 	print $fh "addCacheFile('$filequote',";
-	print $fh "oldMtime=>",$fref->{clientMtime} if $fref->{clientMtime};
+	if ($fref->{clientMtime}) {
+	    print $fh "oldMtime=>",$fref->{clientMtime};
+	} elsif ($fref->{oldMtime}) {
+	    # If we do not have a client time then just store what we had (if anything) 
+	    print $fh "oldMtime=>",$fref->{oldMtime};
+	}
 	print $fh ");\n";
     }
     print $fh "1;\n";

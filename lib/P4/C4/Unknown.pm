@@ -1,4 +1,4 @@
-# $Revision: 1.4 $$Date: 2004/10/15 14:16:42 $$Author: ws150726 $
+# $Revision: 1.6 $$Date: 2004/11/09 13:42:38 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -16,7 +16,7 @@
 package P4::C4::Unknown;
 use strict;
 
-our $VERSION = '2.032';
+our $VERSION = '2.040';
 
 ######################################################################
 ######################################################################
@@ -40,9 +40,12 @@ sub unknown {
 
     my @files;
     my $add;
+    my $printIgnored;
     foreach my $param (@params) {
 	if ($param eq '-a') {
 	    $add = 1;
+	} elsif ($param eq "-pi") {
+	    $printIgnored = 1;
 	} elsif ($param =~ /^-/) {
 	    die "%Error: Unrecognized 'c4 unknown' parameter: $param\n";
 	} else {
@@ -72,6 +75,9 @@ sub unknown {
 	    } else {
 		$stat ||= '?-    ';
 	    }
+	}
+	if ($printIgnored) {
+	    $stat ||= 'i-    ' if ($fref->{ignore});
 	}
 	if ($stat) {
 	    $stat =~ s/-.*$// if !$P4::C4::Debug;

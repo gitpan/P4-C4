@@ -1,4 +1,4 @@
-# $Revision: 1.4 $$Date: 2004/10/15 14:16:42 $$Author: ws150726 $
+# $Revision: 1.5 $$Date: 2004/11/09 13:42:38 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -22,7 +22,7 @@ use strict;
 require Exporter;
 our @ISA = ('Exporter');
 our @EXPORT = qw( fileNoLinks );
-our $VERSION = '2.032';
+our $VERSION = '2.040';
 
 ######################################################################
 

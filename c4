@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-#$Id: c4,v 1.36 2004/10/15 14:15:32 ws150726 Exp $
+#$Id: c4,v 1.39 2004/11/09 13:32:15 ws150726 Exp $
 ######################################################################
 #
 # Copyright 2002-2004 by Wilson Snyder.  This program is free software;
@@ -182,7 +182,7 @@ if ($Opt_Cmd eq "change-max") {
 #----------------------------------------------------------------------
 
 sub usage {
-    print '$Id: c4,v 1.36 2004/10/15 14:15:32 ws150726 Exp $ ', "\n";
+    print '$Id: c4,v 1.39 2004/11/09 13:32:15 ws150726 Exp $ ', "\n";
     pod2usage(-verbose=>2, -exitval => 2);
     exit (1);
 }
@@ -411,16 +411,22 @@ Under c4 style management, C<c4 update> should be used instead.  Under
 traditional management, or with the -p4 flag, calls the normal C<p4 sync>
 command.
 
-=item update [-n] [file...]
+=item update [-n] [-a] [-pi] [-rl] [file...]
 
 Update is similar to cvs update.  With -n, only the actions to be taken are
-shown, it does not actually change anything.  On a update without a -n, c4
+shown, it does not actually change anything.  On an update without a -n, c4
 performs the following steps:
 
 =over 4
 
 C<p4 edit> any files that have been changed from the version checked out
 from the depot.
+
+With the -a option, C<p4 add> any files that are unknown to perforce (?
+becomes an A.)
+
+With the -rl option, C<p4 delete> any files that are missing in client (l
+becomes an R.)
 
 C<p4 revert> any files that were C<p4 edit>ed, but now match the version
 in the depot.
@@ -431,10 +437,14 @@ Look for any unknown files not in a .cvsignore file.
 
 =back
 
-It also prints a summary of each file that is modified in the client area.
+A "c4 update -a -rl" will thus issue appropriate adds and deletes to make
+the depot match the current client view.
+
+Update also prints a summary of each file that is modified in the client
+area, and with the -pi option, ignored (i) files are listed as well.
 Lowercase letters are used for actions that were not caused by the user,
 and are different from cvs letters.  Here are the letters, the state
-causing that message, and what may happen on a update.
+causing that message, and what may happen on an update.
 
     A    (A)dded in client, not yet in depot, stays Add.
     M    (M)odified in client, different from depot, stays Modified.
@@ -444,6 +454,7 @@ causing that message, and what may happen on a update.
     d    Same in client, (d)eleted in depot, will disappear.
     l    (L)ost in client, exists in depot, will appear.
     m    (m)odified in client, but now matches depot, will be reverted.
+    i    (i)gnored and not in depot, and in .cvsignore or global ignores.
     ?    Unknown - Not in depot, not added, not in .cvsignore, no action.
 
 Unknown files (?) should be ignored with a .cvsignore file as described in
@@ -455,7 +466,8 @@ Prints files that are not known to perforce, and do not have a .cvsignore
 line.  This is similar to the '?' lines printed by "c4 update -n", however
 "c4 unknown" may be used with standard perforce clients.
 
-With -a, mark all unknown files to be added to the depot.
+With -a, mark all unknown files to be added to the depot (same as -a option
+in c4 update.)
 
 =back
 
@@ -480,30 +492,50 @@ license, then rather then create a new P4 user, the user in C4USER_DEFAULT
 will be used.  This allows infrequent read-only users to share the same
 license.
 
+=item CVSIGNORE
+
+If specified, adds space seperated list of ignores to global ignore list.
+See .cvsignore below.
+
 =back
 
 =head1 FILES
 
 =over 4
 
+=item .c4cache
+
+This is a temporary file created and maintained by c4 in the top level of
+your client area.  You may safely delete it, however the next c4 operation
+may be significantly slower.
+
 =item .cvsignore
 
 Specifies files that are in the same directory as the .cvsignore that should
 be ignored; there will be no ?'s printed when a 'c4 update' is executed.
 
-Ignore files are mostly compatible with CVS.  The list of ignores is
+Ignore files are mostly compatible with CVS.  The list of global ignores is
 initialized with:
 
-    tags    TAGS    .make.state     .nse_depinfo
     *~      #*      .#*     ,*      _$*     *$
     *.old   *.bak   *.BAK   *.orig  *.rej   .del-*
     *.a     *.olb   *.o     *.obj   *.so    *.exe
     *.Z     *.elc   *.ln
+    .c4cache     .p4config
+    .make.state  .nse_depinfo  .dependency-info
+    tags         TAGS
     core
 
-The patterns found in `.cvsignore' are only valid for the directory that
-contains them, not for any sub-directories.  A single exclamation mark
-(`!')  clears the ignore list.
+Patterns in the home directory file ~/.cvsignore, or the CVSIGNORE
+environment variable are appended to this list.
+
+Each directory may have a local '.cvsignore' file.  The patterns found in
+local `.cvsignore' are only valid for the directory that contains them, not
+for any sub-directories.  
+
+In any of the places listed above, a single exclamation mark (`!')  clears
+the ignore list.  This can be used if you want to store any file which
+normally is ignored.
 
 The wildcards * and ? are honored, no other wildcards are currently
 supported.

@@ -1,4 +1,4 @@
-# $Revision: 1.3 $$Date: 2004/10/15 14:16:42 $$Author: ws150726 $
+# $Revision: 1.5 $$Date: 2004/11/09 13:42:38 $$Author: ws150726 $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
@@ -20,13 +20,12 @@ use P4::Getopt;
 use P4::C4::Cache;
 use P4::C4::Path;
 use strict;
-use vars qw($VERSION);
 use Carp;
 
 ######################################################################
 #### Configuration Section
 
-$VERSION = '2.032';
+our $VERSION = '2.040';
 
 #######################################################################
 #######################################################################
@@ -71,7 +70,7 @@ sub submitCheckC4 {
 	if ($fref->{clientMtime}   # Else might not be checking in this file.  Small danger of a missing "rm" but that's unlikely
 	    && ($fref->{oldMtime}||0) != ($fref->{clientMtime}||0)) {
 	    print "File date off $fref->{filename}\n" if $P4::C4::Debug;
-	    die "%Error: Must c4 update again before submitting\n" if !$force;
+	    die "%Error: Must c4 update again before submitting (due to $fref->{filename})\n" if !$force;
 	}
     }
 }
