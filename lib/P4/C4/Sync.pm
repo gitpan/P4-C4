@@ -1,8 +1,8 @@
-# $Revision: 1.4 $$Date: 2004/11/09 13:42:38 $$Author: ws150726 $
+# $Revision: 709 $$Date: 2005-05-03 17:32:07 -0400 (Tue, 03 May 2005) $$Author: wsnyder $
 # Author: Wilson Snyder <wsnyder@wsnyder.org>
 ######################################################################
 #
-# Copyright 2002-2004 by Wilson Snyder.  This program is free software;
+# Copyright 2002-2005 by Wilson Snyder.  This program is free software;
 # you can redistribute it and/or modify it under the terms of either the GNU
 # General Public License or the Perl Artistic License.
 # 
@@ -22,7 +22,7 @@ use Carp;
 ######################################################################
 #### Configuration Section
 
-our $VERSION = '2.040';
+our $VERSION = '2.041';
 
 #######################################################################
 #######################################################################
@@ -88,7 +88,7 @@ This module is for internal P4::C4 use.
 
 The latest version is available from CPAN and from L<http://www.veripool.com/>.
 
-Copyright 2002-2004 by Wilson Snyder.  This package is free software; you
+Copyright 2002-2005 by Wilson Snyder.  This package is free software; you
 can redistribute it and/or modify it under the terms of either the GNU
 Lesser General Public License or the Perl Artistic License.
 

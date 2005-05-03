@@ -1,0 +1,11 @@
+# http://module-build.sourceforge.net/META-spec.html
+name:         P4-C4
+version:      2.041
+version_from: lib/P4/C4.pm
+license:      perl
+installdirs:  site
+requires:
+    P4::Client:                    2.2279
+
+distribution_type: module
+generated_by: hand

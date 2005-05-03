@@ -1,12 +1,14 @@
-P4::C4 NEWS --  history of user-visible changes.
-Copyright (C) 2002 Wilson Snyder.
-See the end for copying conditions.
+Revision history for Perl extension P4::C4
 
-The contributors that suggested a given feature is shown in [].
-	
-This uses outline mode in Emacs.  See C-h m [M-x describe-mode].
-
-* Changes in P4::C4 2.040 11/9/2004
+The contributors that suggested a given feature are shown in [].
+
+* P4::C4 2.041 5/3/2004
+
+**	NEWS is now renamed Changes, to support CPAN indexing.
+
+****    Fixed adding deleted files back when using update -a.  [by David Rees]
+
+* P4::C4 2.040 11/9/2004
 
 ***	Added 'c4 update/unknown -pi' to print those files which are
 	unknown, but suppressed with a .cvsignore file.  [David Rees]
@@ -24,20 +26,20 @@ This uses outline mode in Emacs.  See C-h m [M-x describe-mode].
 ****	Added "due to {filename}" to "Must update again." [David Rees]
 
 ****	Fixed performance problem when updating subdirs. [David Rees]
-
-* Changes in P4::C4 2.032 10/15/2004
+
+* P4::C4 2.032 10/15/2004
 
 ***	Added 'c4 change-max'.  [Rajesh Vaidheeswarran]
 
 ***	Added 'c4 unknown -a' to add files. [David Rees]
-
-* Changes in P4::C4 2.031 9/14/2004
+
+* P4::C4 2.031 9/14/2004
 
 ***	Added 'c4 help-summary'
 
 ****	Fix filenames to support case-independence on Windows. [David Rees]
-
-* Changes in P4::C4 2.030 8/30/2004
+
+* P4::C4 2.030 8/30/2004
 
 ***	Detect c4 style clients, and on non-c4 clients allow sync/sumbit.
 	Also allow raw p4 sync or submit with new -p4 flag.
@@ -47,19 +49,18 @@ This uses outline mode in Emacs.  See C-h m [M-x describe-mode].
 ****	Support new 2003.02 commands
 
 ****	Fix processing of filenames with embeded spaces. [Greg Waters]
-
-* Changes in P4::C4 2.021 1/27/2004
+
+* P4::C4 2.021 1/27/2004
 
 ****	Documentation fixes.
-
-* Changes in P4::C4 2.020 8/6/2003
+
+* P4::C4 2.020 8/6/2003
 
 **	Added "c4 unknown" command.
 
 ***	Fixed "c4 client-delete" when the client dir no longer exists.
 
-
-* Changes in P4::C4 2.010 3/18/2003
+* P4::C4 2.010 3/18/2003
 
 **	Added "c4 client-delete" command.
 
@@ -72,8 +73,7 @@ This uses outline mode in Emacs.  See C-h m [M-x describe-mode].
 
 ****	Fix bug with haveRev not set if file created during update
 
-
-* Changes in P4::C4 2.000 8/08/2002
+* P4::C4 2.000 8/08/2002
 
 **	First CPAN Release
 
@@ -97,17 +97,16 @@ This uses outline mode in Emacs.  See C-h m [M-x describe-mode].
 
 
 ----------------------------------------------------------------------
-$Id: NEWS,v 1.25 2004/11/09 13:35:16 ws150726 Exp $
+$Id: Changes 709 2005-05-03 21:32:07Z wsnyder $
 ----------------------------------------------------------------------
-Copyright information:
 
-   Copyright 2002-2004 by Wilson Snyder.  This program is free software;
-   you can redistribute it and/or modify it under the terms of either the GNU
-   General Public License or the Perl Artistic License.
+This uses outline mode in Emacs.  See C-h m [M-x describe-mode].
 
-   See the README file included with this file for licencing information.
+Copyright 2002-2005 by Wilson Snyder.  This program is free software;
+you can redistribute it and/or modify it under the terms of either the GNU
+General Public License or the Perl Artistic License.
 
 Local variables:
 mode: outline
-paragraph-separate: "[ 	]*$"
+paragraph-separate: "[ 	\f\n]*$"
 end:

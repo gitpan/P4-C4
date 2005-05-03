@@ -4,11 +4,13 @@
 @settitle Perl P4::C4 Installation
 @c %**end of header
 
-@c $Revision: 1.6 $$Date: 2004/01/27 18:59:22 $$Author: wsnyder $
+@c $Revision: 709 $$Date: 2005-05-03 17:32:07 -0400 (Tue, 03 May 2005) $$Author: wsnyder $
 @c DESCRIPTION: TexInfo: DOCUMENT source run through texinfo to produce README file
 @c Use 'make README' to produce the output file
+@c Before release, run C-u C-c C-u C-a (texinfo-all-menus-update)
 
 @node Top, Copyright, (dir), (dir)
+@chapter P4::C4
 
 This is the P4::C4 Perl Package.
 
@@ -18,12 +20,13 @@ This is the P4::C4 Perl Package.
 * Obtaining Distribution::      
 * Supported Systems::           
 * Installation::                
+* Differences from C4-1.6::     
 @end menu
 
 @node Copyright, Description, Top, Top
 @section Copyright
 
-This package is Copyright 2002-2004 by Wilson Snyder @email{wsnyder@@wsnyder.org}.
+This package is Copyright 2002-2005 by Wilson Snyder @email{wsnyder@@wsnyder.org}.
 
 You may distribute under the terms of either the GNU General Public License
 or the Perl Artistic License, as specified in the Perl README file.
@@ -58,7 +61,7 @@ It should run on any Unix system with Perforce, provided that the
 required perl modules below are ported to the platform.  Minor porting
 may be required for Windows systems.
 
-@node Installation, Installation, Supported Systems, Top
+@node Installation, Differences from C4-1.6, Supported Systems, Top
 @section Installation
 
 @enumerate
@@ -90,10 +93,10 @@ Type @samp{c4 help} to see the command line interface.
 
 @end enumerate
 
-@node Installation,  , Installation, Top
+@node Differences from C4-1.6,  , Installation, Top
 @section Differences from C4-1.6
 
 This C4 package is based upon c4-1.6 written in C by Neil Russell in
 1999.  It has the same basic operations, with several minor differences.
-For these differences, see the bottom of the NEWS file in the same directory as this readme.
+For these differences, see the bottom of the Changes file in the same directory as this readme.
 

@@ -1,7 +1,7 @@
-# $Id: Makefile.PL,v 1.12 2004/09/01 13:45:52 ws150726 Exp $
+# $Id: Makefile.PL 709 2005-05-03 21:32:07Z wsnyder $
 # DESCRIPTION: Perl ExtUtils: Type 'perl Makefile.PL' to create a Makefile for this package
 #
-# Copyright 2002-2004 by Wilson Snyder.  This program is free software;
+# Copyright 2002-2005 by Wilson Snyder.  This program is free software;
 # you can redistribute it and/or modify it under the terms of either the GNU
 # General Public License or the Perl Artistic License.
 
@@ -15,7 +15,7 @@ install-here::
 	make install
 
 README: readme.texi
-	-rm \$@
+	-rm -rf \$@
 	makeinfo \$< --output \$@ --no-headers --no-validate
 
 ## Maintainer use:
@@ -23,17 +23,17 @@ preexist:
 	test ! -r \$(HOME)/src/kits/\$(DISTVNAME).tar.gz
 
 tag:
-	cvs tag -F \$(DISTNAME)_\$(VERSION_SYM) .
+	svnorcvs tag  \$(DISTNAME)_\$(VERSION_SYM)
 
 maintainer-diff:
-	cvs diff -r \$(DISTNAME)_\$(VERSION_SYM) 
+	svnorcvs diff \$(DISTNAME)_\$(VERSION_SYM) 
 
 maintainer-dist: preexist dist tag
 	cp \$(DISTVNAME).tar.gz \$(HOME)/src/kits
 	mv \$(DISTVNAME).tar.gz \$(HOME)/backpack
 
 maintainer-clean: distclean
-	-rm README Makefile
+	-rm -rf README Makefile
 
 dist: distcheck
 ";
@@ -46,6 +46,7 @@ WriteMakefile(
 	      AUTHOR	=> 'Wilson Snyder <wsnyder@wsnyder.org>',
 	      ABSTRACT_FROM => 'lib/P4/C4.pm',
 	      VERSION_FROM  => 'lib/P4/C4.pm',
+	      NO_META	=> 1,
 	      PREREQ_PM => {'P4::Client' => 2.2279,
 			},
 	      EXE_FILES	=> [qw( c4 c4_job_edit )],

@@ -2,7 +2,7 @@
 COPYING
 MANIFEST
 Makefile.PL
-NEWS
+Changes
 README
 c4
 c4_job_edit
@@ -34,3 +34,4 @@ t/45_info.t
 t/46_client.t
 t/80_c4.t
 t/test_utils.pl
+META.yml

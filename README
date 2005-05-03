@@ -1,9 +1,12 @@
-   This is the P4::C4 Perl Package.
+1 P4::C4
+********
 
-Copyright
-=========
+This is the P4::C4 Perl Package.
 
-   This package is Copyright 2002-2004 by Wilson Snyder
+1.1 Copyright
+=============
+
+This package is Copyright 2002-2005 by Wilson Snyder
 <wsnyder@wsnyder.org>.
 
    You may distribute under the terms of either the GNU General Public
@@ -13,23 +16,23 @@ file.
    This code is provided with no warranty of any kind, and is used
 entirely at your own risk.
 
-Description
-===========
+1.2 Description
+===============
 
-   This package wraps the Perforce client in a CVS like wrapper.
+This package wraps the Perforce client in a CVS like wrapper.
 
-Obtaining Distribution
-======================
+1.3 Obtaining Distribution
+==========================
 
-   The latest version is available at `http://www.perl.org/CPAN/'
+The latest version is available at `http://www.perl.org/CPAN/'
 
    Download the latest package from that site, and decompress.  `gunzip
 P4-C4_version.tar.gz ; tar xvf P4-C4_version.tar'
 
-Supported Systems
-=================
+1.4 Supported Systems
+=====================
 
-   This version of P4::C4 has been built and tested on:
+This version of P4::C4 has been built and tested on:
 
    * i386-linux
 
@@ -37,8 +40,8 @@ Supported Systems
 required perl modules below are ported to the platform.  Minor porting
 may be required for Windows systems.
 
-Installation
-============
+1.5 Installation
+================
 
   1.  Before installing this module, you need the Perforce Perl library,
      P4::Client, available from CPAN or www.perforce.com.  This in turn
@@ -59,11 +62,11 @@ Installation
   7. Type `c4 help' to see the command line interface.
 
 
-Differences from C4-1.6
-=======================
+1.6 Differences from C4-1.6
+===========================
 
-   This C4 package is based upon c4-1.6 written in C by Neil Russell in
+This C4 package is based upon c4-1.6 written in C by Neil Russell in
 1999.  It has the same basic operations, with several minor differences.
-For these differences, see the bottom of the NEWS file in the same
+For these differences, see the bottom of the Changes file in the same
 directory as this readme.
 
